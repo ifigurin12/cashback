@@ -1,14 +1,30 @@
-class Card {
+import 'package:cashback_info/data_layer/models/cashback.dart';
+import 'package:hive/hive.dart';
+
+part 'card.g.dart';
+
+
+@HiveType(typeId: 0)
+class BankCard {
+  @HiveField(0)
   String bankName;
-  List<int> cashbackCategoriesId = [];
-  late DateTime lastUpdate;
+  @HiveField(1)
+  List<Cashback> cashbackCategories;
+  @HiveField(2)
+  DateTime lastUpdate;
 
-  Card({required this.bankName})
-  {
-    lastUpdate = DateTime.now();
-  }
+  BankCard(
+      {required this.bankName,
+      required this.cashbackCategories,
+      required this.lastUpdate});
 
-  void getCashbackCategories(List<int> categoriesId) {
-    categoriesId.forEach((element) => cashbackCategoriesId.add(element));
+  @override
+  String toString() {
+    String cashback = '';
+    for (var item in cashbackCategories) 
+    {
+      cashback += item.name + ' '; 
+    }
+    return 'Name: $bankName ' + 'cashbacks: $cashback' + 'last update: $lastUpdate\n';
   }
 }

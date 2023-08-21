@@ -1,41 +1,78 @@
-import 'dart:io';
+import 'package:hive/hive.dart';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/sqlite_api.dart';
+import 'package:cashback_info/data_layer/models/card.dart';
+import 'package:cashback_info/data_layer/models/cashback.dart';
 
-class DBProvider {
-  DBProvider._();
-  static final DBProvider db = DBProvider._();
 
-  static late Database _database;
+class DataBase {
+  String baseName;
+  Future<Box<BankCard>>? cardBox;
 
-  String studentsTable = 'Students';
-  String columnId = 'id';
-  String columnName = 'name';
-
-  Future<Database> get database async {
-    //if (_database != null) return _database;
-
-    _database = await _initDB();
-    return _database;
+  void closeDatabase()
+  {
+    Hive.close();
   }
 
-  Future<Database> _initDB() async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    String path = dir.path + 'Student.db';
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+  void initialize()
+  {
+    cardBox = Hive.openBox<BankCard>(baseName);
   }
 
-  // Student
-  // Id | Name
-  // 0    ..
-  // 1    ..
-
-  void _createDB(Database db, int version) async {
-    await db.execute(
-      'CREATE TABLE $studentsTable($columnId INTEGER PRIMARY KEY AUTOINCREMENT, $columnName TEXT)',
-    );
+  DataBase(String path, {required this.baseName}) {
+    Hive.init(path);
+    if(!Hive.isAdapterRegistered(0) || !Hive.isAdapterRegistered(1)) 
+    {
+      Hive.registerAdapter(CashbackAdapter());
+      Hive.registerAdapter(BankCardAdapter());
+    }
   }
 
+  Future<String> addBankCard(BankCard card) async {
+    String resultMessage = '';
+    var box = await cardBox;
+    if (box!.keys.contains(card.bankName)) {
+      resultMessage = 'Карта с таким именем уже существует';
+    } else {
+      box.put('${card.bankName}', card);
+      resultMessage = 'Карта успешно добавлена';
+    }
+    return resultMessage;
+  }
+
+  Future<String> deleteBankCard(String cardName) async {
+    String resultMessage = '';
+    var box = await cardBox;
+    if (box!.containsKey(cardName)) {
+      box.delete(cardName);
+      resultMessage = 'Карта успешно удалена';
+    } else {
+      resultMessage = 'Карта с таким именем не существует';
+    }
+    return resultMessage;
+  }
+
+  Future<String> updateBankCardWithName(String previousCardName, BankCard card) async {
+    String resultMessage = '';
+    var box = await cardBox;
+    if (box!.containsKey(previousCardName)) {
+      box.delete(previousCardName);
+      box.put(card.bankName, card);
+      resultMessage = 'Карта успешно обновлена';
+    } else {
+      resultMessage = 'Карта с таким именем не существует';
+    }
+    return resultMessage;
+  }
+
+  Future<BankCard> getBankCardWithName(String cardName) async {
+    var box = await cardBox;
+    BankCard desiredCard = box!.get(cardName)!;
+    return desiredCard;
+  }
+
+  Future<Iterable<BankCard>> getAllBankCards() async {
+    var box = await cardBox;
+    var cardList = box!.values;
+    return cardList;
+  }
 }
