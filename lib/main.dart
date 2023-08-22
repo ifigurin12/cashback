@@ -1,3 +1,4 @@
+import 'package:cashback_info/ui/add_card_page.dart';
 import 'package:cashback_info/ui/home_page.dart';
 import 'package:flutter/material.dart';
 
@@ -15,12 +16,11 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        
         colorSchemeSeed: Colors.blue,
-        brightness: Brightness.light,
+        brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: HomePage(),
+      home: AddCardPage(),
     );
   }
 }
