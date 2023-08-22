@@ -1,30 +1,30 @@
+import 'dart:io';
+
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
-
 
 class DataBase {
   String baseName;
   Future<Box<BankCard>>? cardBox;
 
-  void closeDatabase()
-  {
+  void closeDatabase() {
     Hive.close();
   }
 
-  void initialize()
-  {
+  void initialize() {
     cardBox = Hive.openBox<BankCard>(baseName);
   }
 
-  DataBase(String path, {required this.baseName}) {
-    Hive.init(path);
-    if(!Hive.isAdapterRegistered(0) || !Hive.isAdapterRegistered(1)) 
-    {
+  DataBase({required this.baseName}) {
+    Hive.init(Directory.current.path);
+    if (!Hive.isAdapterRegistered(0) || !Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(CashbackAdapter());
       Hive.registerAdapter(BankCardAdapter());
     }
+    initialize();
   }
 
   Future<String> addBankCard(BankCard card) async {
@@ -51,7 +51,8 @@ class DataBase {
     return resultMessage;
   }
 
-  Future<String> updateBankCardWithName(String previousCardName, BankCard card) async {
+  Future<String> updateBankCardWithName(
+      String previousCardName, BankCard card) async {
     String resultMessage = '';
     var box = await cardBox;
     if (box!.containsKey(previousCardName)) {
