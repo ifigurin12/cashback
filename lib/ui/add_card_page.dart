@@ -39,6 +39,13 @@ class _AddCardPageState extends State<AddCardPage> {
   String _selectedCountOfCategory = countOfCategories[3];
   List<String> _selectedCategories = [];
   TextEditingController _cardNameController = TextEditingController();
+
+  @override
+  void initState() {
+    _selectedCategories = List.filled(int.parse(_selectedCountOfCategory), categoriesOfCashback[0]);
+    super.initState();
+  }
+
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
@@ -54,7 +61,8 @@ class _AddCardPageState extends State<AddCardPage> {
           padding: const EdgeInsets.only(left: 16, right: 16),
           child: Form(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextField(
                   controller: _cardNameController,
@@ -69,7 +77,7 @@ class _AddCardPageState extends State<AddCardPage> {
                       child: Text('Выберите кол-во категорий:'),
                     ),
                     Expanded(
-                      child: DropdownButtonFormField<String>(
+                      child: DropdownButton<String>(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                         value: _selectedCountOfCategory,
                         items: countOfCategories
@@ -83,35 +91,40 @@ class _AddCardPageState extends State<AddCardPage> {
                         onChanged: (value) {
                           setState(() {
                             _selectedCountOfCategory = value!;
+                            _selectedCategories = List.filled(int.parse(_selectedCountOfCategory), categoriesOfCashback[0]);
                           });
                         },
                       ),
                     ),
                   ],
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: int.parse(_selectedCountOfCategory),
-                  itemBuilder: (context, index) {
-                    DropdownButtonFormField<String>(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      value: _selectedCountOfCategory,
-                      items: countOfCategories
-                          .map<DropdownMenuItem<String>>(
-                            (e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(e),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCountOfCategory = value!;
-                        });
-                      },
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    late List<DropdownButton<String>> menuList = List.generate(int.parse(_selectedCountOfCategory), (index) => DropdownButton<String>(
+                        value: _selectedCategories[index],
+                        items: categoriesOfCashback
+                            .map<DropdownMenuItem<String>>(
+                              (e) => DropdownMenuItem(
+                                child: Text(e),
+                                value: e,
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategories[index] = value!;
+                          });
+                        },
+                      ),
+                    );
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: menuList.length,
+                      itemBuilder: (context, index) => menuList[index],
                     );
                   },
                 ),
+                ElevatedButton(onPressed: () {}, child: Text('Ввести'))
               ],
             ),
           ),
