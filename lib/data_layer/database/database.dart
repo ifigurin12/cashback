@@ -8,28 +8,29 @@ import 'package:cashback_info/data_layer/models/cashback.dart';
 
 class DataBase {
   String baseName;
-  Future<Box<BankCard>>? cardBox;
+  late Box<BankCard> cardBox;
 
   void closeDatabase() {
     Hive.close();
   }
 
-  void initialize() {
-    cardBox = Hive.openBox<BankCard>(baseName);
+  void initialize() async {
+    await Hive.initFlutter();
   }
 
   DataBase({required this.baseName}) {
-    Hive.init(Directory.current.path);
+    initialize();
     if (!Hive.isAdapterRegistered(0) || !Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(CashbackAdapter());
       Hive.registerAdapter(BankCardAdapter());
     }
-    initialize();
   }
 
   Future<String> addBankCard(BankCard card) async {
+    if (!cardBox!.isOpen) { cardBox = await Hive.openBox<BankCard>(baseName);}
     String resultMessage = '';
-    var box = await cardBox;
+    var box = await cardBox; 
+
     if (box!.keys.contains(card.bankName)) {
       resultMessage = 'Карта с таким именем уже существует';
     } else {
@@ -73,7 +74,12 @@ class DataBase {
 
   Future<Iterable<BankCard>> getAllBankCards() async {
     var box = await cardBox;
-    var cardList = box!.values;
-    return cardList;
+    if (box != null) {
+      var cardList = box!.values;
+      return cardList;
+    }
+    else {
+      return [];
+    }
   }
 }

@@ -1,7 +1,11 @@
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cashback_info/bloc/bank_card_bloc.dart';
 
 List<String> categoriesOfCashback = [
   'Авто',
@@ -80,17 +84,16 @@ class _AddCardPageState extends State<AddCardPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextFormField(
-                  controller: _cardNameController,
-                  decoration: const InputDecoration(
-                    hintText: 'Введите название карты',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Пожалуйста введие название карты';
-                    }
-                    return null;
-                  }
-                ),
+                    controller: _cardNameController,
+                    decoration: const InputDecoration(
+                      hintText: 'Введите название карты',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Пожалуйста введие название карты';
+                      }
+                      return null;
+                    }),
                 Row(
                   children: [
                     const Expanded(
@@ -123,28 +126,28 @@ class _AddCardPageState extends State<AddCardPage> {
                 ),
                 LayoutBuilder(
                   builder: (context, constraints) {
-                    late List<DropdownButtonFormField<String>> menuList =
+                    List<DropdownButtonFormField<String>> menuList =
                         List.generate(
                       int.parse(_selectedCountOfCategory),
                       (index) => DropdownButtonFormField<String>(
                         validator: (value) {
                           bool isUnrepeat = true;
-                          for (int i = 0; i < _selectedCategories.length - 1; i++)
+                          for (int i = 0;
+                              i < _selectedCategories.length - 1;
+                              i++)
                             // ignore: curly_braces_in_flow_control_structures
-                            for (int j = i + 1; j < _selectedCategories.length; j++)
-                            {
-                              if (_selectedCategories[i] == _selectedCategories[j])  
-                              {
+                            for (int j = i + 1;
+                                j < _selectedCategories.length;
+                                j++) {
+                              if (_selectedCategories[i] ==
+                                  _selectedCategories[j]) {
                                 isUnrepeat = false;
                               }
                             }
-                          
-                          if (!isUnrepeat)
-                          {
+
+                          if (!isUnrepeat) {
                             return 'Выберите разные категории из предложенных';
-                          }
-                          else 
-                          {
+                          } else {
                             return null;
                           }
                         },
@@ -181,24 +184,53 @@ class _AddCardPageState extends State<AddCardPage> {
                             .map((e) => Cashback(name: e))
                             .toList(),
                       );
-                      print(_userCard.toString());
-                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          duration: Duration(seconds: 1),
-                          backgroundColor: Colors.green,
-                          content: Text(
-                            'Карта успешно добавлена',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18.0,
-                            ),
-                          ),
-                        ),
-                      );
+                      BlocProvider.of<BankCardBloc>(context)
+                          .add(AddBankCardToDB(userCard: _userCard));
                       _formKey.currentState!.save();
-                      Navigator.of(context).pop();
-                    } 
+
+                      BlocBuilder(
+                        builder: (context, state) {
+                          if (state is AddBankCard) {
+                            if (state.props[0] == 'Карта успешно добавлена') 
+                            {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  duration: Duration(seconds: 3),
+                                  backgroundColor: Colors.green,
+                                  content: Text(
+                                    'Карта успешно добавлена',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18.0,
+                                    ),
+                                  ),
+                                ),
+                              );
+                              Navigator.of(context).pop();
+                            }
+                            else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  duration: Duration(seconds: 3),
+                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    'Карта с таким именем уже существует',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18.0,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                          return Center();
+                        },
+                        
+                      );
+                    }
                   },
                   child: Text('Ввести'),
                 ),

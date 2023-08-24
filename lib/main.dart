@@ -4,6 +4,9 @@ import 'package:cashback_info/ui/home_page.dart';
 import 'package:cashback_info/ui/not_found_page.dart';
 import 'package:cashback_info/ui/update_card_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:cashback_info/bloc/bank_card_bloc.dart';
 
 import 'data_layer/models/cashback.dart';
 
@@ -41,7 +44,10 @@ class MyApp extends StatelessWidget {
             case AddCardPage.routeName:
               return PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    AddCardPage(),
+                    BlocProvider(
+                  create: (context) => BankCardBloc(),
+                  child: AddCardPage(),
+                ),
               );
             case NotFoundPage.routeName:
               return PageRouteBuilder(

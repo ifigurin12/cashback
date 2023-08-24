@@ -40,6 +40,14 @@ final class GetAllBankCards extends BankCardState {
   @override
   List<Object?> get props => [cards];
 }
+final class GetAllCardsFail extends BankCardState {
+  String message; 
+
+  GetAllCardsFail({required this.message}); 
+
+  @override
+  List<Object?> get props => [message];
+}
 
 final class GetBankCardByName extends BankCardState {
   BankCard card; 
@@ -49,7 +57,14 @@ final class GetBankCardByName extends BankCardState {
   @override
   List<Object?> get props => [card];
 }
+final class GetBankCardFail extends BankCardState {
+  String message; 
 
+  GetBankCardFail({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
 final class UpdateBankCard extends BankCardState{
   String message; 
 

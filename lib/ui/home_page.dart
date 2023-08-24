@@ -1,44 +1,77 @@
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
+
 import 'package:cashback_info/ui/add_card_page.dart';
 import 'package:cashback_info/ui/update_card_page.dart';
-import 'package:flutter/material.dart';
 
-class HomePage extends StatelessWidget {
-  static const String routeName = '/homePage';
+import 'package:cashback_info/bloc/bank_card_bloc.dart';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class HomePage extends StatefulWidget {
+    static const String routeName = '/homePage';
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    List<BankCard> _usersCard = [];
     final _size = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Кешбек по картам',
-          style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(
-                      AddCardPage.routeName,
-                    );
-
-            },
-            icon: Icon(Icons.add),
+    return BlocProvider<BankCardBloc>(
+      create: (context) => BankCardBloc()..add(GetAllBankCardsFromDB()),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Кешбек по картам',
+            style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
           ),
-        ],
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        itemCount: 3,
-        itemBuilder: (context, index) =>
-            showCardInformation(context, cardList[index], _size.width, _size.height),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                  AddCardPage.routeName,
+                );
+              },
+              icon: Icon(Icons.add),
+            ),
+          ],
+          centerTitle: true,
+        ),
+        body: BlocBuilder<BankCardBloc, BankCardState>(
+          builder: (context, state) {
+            if(state is BankCardInitial) 
+            {
+              return CircularProgressIndicator();
+            }
+            else if (state is GetAllBankCards) 
+            {
+              _usersCard = state.props[0] as List<BankCard>;
+              return ListView.builder(
+              itemCount: _usersCard.length,
+              itemBuilder: (context, index) => showCardInformation(
+                  context, _usersCard[index], _size.width, _size.height),
+            );
+            }
+            else {
+              return Center(child: Text(state.props[0] as String));
+            }
+          },
+        ),
       ),
     );
   }
 }
 
-Widget showCardInformation(BuildContext context, BankCard card, double width, double height) {
+Widget showCardInformation(
+    BuildContext context, BankCard card, double width, double height) {
   return Container(
     height: height * 0.30,
     padding: EdgeInsets.all(width * 0.03),
@@ -86,10 +119,9 @@ Widget showCardInformation(BuildContext context, BankCard card, double width, do
             IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed(
-                      UpdateCardPage.routeName,
-                      arguments: card,
-                    );
-
+                  UpdateCardPage.routeName,
+                  arguments: card,
+                );
               },
               icon: const Icon(
                 Icons.edit,
