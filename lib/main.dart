@@ -1,6 +1,11 @@
+import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/ui/add_card_page.dart';
 import 'package:cashback_info/ui/home_page.dart';
+import 'package:cashback_info/ui/not_found_page.dart';
+import 'package:cashback_info/ui/update_card_page.dart';
 import 'package:flutter/material.dart';
+
+import 'data_layer/models/cashback.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,15 +18,37 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.dark,
-        useMaterial3: true,
-      ),
-      home: AddCardPage(),
-    );
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorSchemeSeed: Colors.blue,
+          brightness: Brightness.dark,
+          useMaterial3: true,
+        ),
+        initialRoute: HomePage.routeName,
+        onGenerateRoute: (settings) {
+          switch (settings.name) {
+            case HomePage.routeName:
+              return PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    HomePage(),
+              );
+            case UpdateCardPage.routeName:
+              final arg = settings.arguments as BankCard;
+              return PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      UpdateCardPage(userCardToUpdate: arg));
+            case AddCardPage.routeName:
+              return PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    AddCardPage(),
+              );
+            case NotFoundPage.routeName:
+              return PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    NotFoundPage(),
+              );
+          }
+        });
   }
 }
-

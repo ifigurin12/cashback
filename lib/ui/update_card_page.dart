@@ -10,7 +10,7 @@ List<String> categoriesOfCashback = [
   'Дом и ремонт',
   'Животные',
   'Здоровье',
-  'Кафе и рестораны',
+  'Рестораны',
   'Книги',
   'Коммунальные услуги',
   'Красота',
@@ -31,15 +31,17 @@ List<String> categoriesOfCashback = [
 ];
 List<String> countOfCategories = ['1', '2', '3', '4', '5', '6'];
 
-class AddCardPage extends StatefulWidget {
-  static const String routeName = '/addCardPage';
+class UpdateCardPage extends StatefulWidget {
+  static const String routeName = '/updateCardPage';
+  BankCard userCardToUpdate; 
 
-  State<AddCardPage> createState() => _AddCardPageState();
+  UpdateCardPage({required this.userCardToUpdate});
+
+  State<UpdateCardPage> createState() => _UpdateCardPageState();
 }
 
-class _AddCardPageState extends State<AddCardPage> {
-  String _selectedCategory = categoriesOfCashback[3];
-  String _selectedCountOfCategory = countOfCategories[3];
+class _UpdateCardPageState extends State<UpdateCardPage> {
+  late String _selectedCountOfCategory;
   List<String> _selectedCategories = [];
 
   TextEditingController _cardNameController = TextEditingController();
@@ -50,7 +52,15 @@ class _AddCardPageState extends State<AddCardPage> {
   @override
   void initState() {
     _selectedCategories = List.filled(
-        int.parse(_selectedCountOfCategory), categoriesOfCashback[0]);
+        widget.userCardToUpdate.cashbackCategories.length, categoriesOfCashback[0]);
+
+    _userCard = widget.userCardToUpdate;
+    _selectedCountOfCategory = _userCard.cashbackCategories.length.toString();
+    
+    _cardNameController.text = widget.userCardToUpdate.bankName;
+    _selectedCategories = _userCard.cashbackCategories
+                            .map((e) => e.name)
+                            .toList();
     super.initState();
   }
 
@@ -65,7 +75,7 @@ class _AddCardPageState extends State<AddCardPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Добавление карты',
+          'Обновление карты',
           style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
@@ -187,7 +197,7 @@ class _AddCardPageState extends State<AddCardPage> {
                           duration: Duration(seconds: 1),
                           backgroundColor: Colors.green,
                           content: Text(
-                            'Карта успешно добавлена',
+                            'Регистрация завершена успешно',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -197,10 +207,9 @@ class _AddCardPageState extends State<AddCardPage> {
                         ),
                       );
                       _formKey.currentState!.save();
-                      Navigator.of(context).pop();
                     } 
                   },
-                  child: Text('Ввести'),
+                  child: Text('Обновить'),
                 ),
               ],
             ),

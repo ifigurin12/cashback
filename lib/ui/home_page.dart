@@ -1,8 +1,12 @@
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
+import 'package:cashback_info/ui/add_card_page.dart';
+import 'package:cashback_info/ui/update_card_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
+  static const String routeName = '/homePage';
+
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
@@ -14,7 +18,12 @@ class HomePage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed(
+                      AddCardPage.routeName,
+                    );
+
+            },
             icon: Icon(Icons.add),
           ),
         ],
@@ -23,15 +32,15 @@ class HomePage extends StatelessWidget {
       body: ListView.builder(
         itemCount: 3,
         itemBuilder: (context, index) =>
-            showCardInformation(cardList[index], _size.width, _size.height),
+            showCardInformation(context, cardList[index], _size.width, _size.height),
       ),
     );
   }
 }
 
-Widget showCardInformation(BankCard card, double width, double height) {
+Widget showCardInformation(BuildContext context, BankCard card, double width, double height) {
   return Container(
-    height: height * 0.27,
+    height: height * 0.30,
     padding: EdgeInsets.all(width * 0.03),
     margin: EdgeInsets.all(width * 0.03),
     decoration: const BoxDecoration(
@@ -75,7 +84,13 @@ Widget showCardInformation(BankCard card, double width, double height) {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                      UpdateCardPage.routeName,
+                      arguments: card,
+                    );
+
+              },
               icon: const Icon(
                 Icons.edit,
                 color: Colors.white,
