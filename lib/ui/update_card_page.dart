@@ -33,7 +33,7 @@ List<String> countOfCategories = ['1', '2', '3', '4', '5', '6'];
 
 class UpdateCardPage extends StatefulWidget {
   static const String routeName = '/updateCardPage';
-  BankCard userCardToUpdate; 
+  BankCard userCardToUpdate;
 
   UpdateCardPage({required this.userCardToUpdate});
 
@@ -52,15 +52,15 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
   @override
   void initState() {
     _selectedCategories = List.filled(
-        widget.userCardToUpdate.cashbackCategories.length, categoriesOfCashback[0]);
+        widget.userCardToUpdate.cashbackCategories.length,
+        categoriesOfCashback[0]);
 
     _userCard = widget.userCardToUpdate;
     _selectedCountOfCategory = _userCard.cashbackCategories.length.toString();
-    
+
     _cardNameController.text = widget.userCardToUpdate.bankName;
-    _selectedCategories = _userCard.cashbackCategories
-                            .map((e) => e.name)
-                            .toList();
+    _selectedCategories =
+        _userCard.cashbackCategories.map((e) => e.name).toList();
     super.initState();
   }
 
@@ -90,17 +90,16 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 TextFormField(
-                  controller: _cardNameController,
-                  decoration: const InputDecoration(
-                    hintText: 'Введите название карты',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Пожалуйста введие название карты';
-                    }
-                    return null;
-                  }
-                ),
+                    controller: _cardNameController,
+                    decoration: const InputDecoration(
+                      hintText: 'Введите название карты',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Пожалуйста введие название карты';
+                      }
+                      return null;
+                    }),
                 Row(
                   children: [
                     const Expanded(
@@ -122,9 +121,14 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                         onChanged: (value) {
                           setState(() {
                             _selectedCountOfCategory = value!;
-                            _selectedCategories = List.filled(
-                                int.parse(_selectedCountOfCategory),
-                                categoriesOfCashback[0]);
+                            _selectedCategories = List.generate(
+                                int.parse(_selectedCountOfCategory), (index) {
+                              if (index < _selectedCategories.length) {
+                                return _selectedCategories[index];
+                              } else {
+                                return categoriesOfCashback[0];
+                              }
+                            });
                           });
                         },
                       ),
@@ -139,22 +143,22 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                       (index) => DropdownButtonFormField<String>(
                         validator: (value) {
                           bool isUnrepeat = true;
-                          for (int i = 0; i < _selectedCategories.length - 1; i++)
+                          for (int i = 0;
+                              i < _selectedCategories.length - 1;
+                              i++)
                             // ignore: curly_braces_in_flow_control_structures
-                            for (int j = i + 1; j < _selectedCategories.length; j++)
-                            {
-                              if (_selectedCategories[i] == _selectedCategories[j])  
-                              {
+                            for (int j = i + 1;
+                                j < _selectedCategories.length;
+                                j++) {
+                              if (_selectedCategories[i] ==
+                                  _selectedCategories[j]) {
                                 isUnrepeat = false;
                               }
                             }
-                          
-                          if (!isUnrepeat)
-                          {
+
+                          if (!isUnrepeat) {
                             return 'Выберите разные категории из предложенных';
-                          }
-                          else 
-                          {
+                          } else {
                             return null;
                           }
                         },
@@ -192,12 +196,12 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                             .toList(),
                       );
                       print(_userCard.toString());
-                       ScaffoldMessenger.of(context).showSnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           duration: Duration(seconds: 1),
                           backgroundColor: Colors.green,
                           content: Text(
-                            'Регистрация завершена успешно',
+                            'Обновление карты выполнено успешно',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -206,8 +210,9 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                           ),
                         ),
                       );
+                      Navigator.of(context).pop();
                       _formKey.currentState!.save();
-                    } 
+                    }
                   },
                   child: Text('Обновить'),
                 ),
