@@ -54,12 +54,12 @@ Widget showCardInformation(
     height: card.cashbackCategories.length < 3 ? height * 0.2 : height * 0.25,
     padding: EdgeInsets.all(width * 0.03),
     margin: EdgeInsets.all(width * 0.03),
-    decoration: const BoxDecoration(
-      color: Color.fromARGB(255, 54, 131, 175),
-      borderRadius: BorderRadius.all(
+    decoration: BoxDecoration(
+      color: card.bankType == BankType.tinkoff ? const Color.fromARGB(197, 0, 0, 0) : const Color.fromARGB(172, 244, 67, 54),
+      borderRadius: const BorderRadius.all(
         Radius.circular(15),
       ),
-      boxShadow: [
+      boxShadow: const [
         BoxShadow(
           blurRadius: 21,
           spreadRadius: 2,
