@@ -42,7 +42,7 @@ class AddCardPage extends StatefulWidget {
 class _AddCardPageState extends State<AddCardPage> {
   String _selectedCountOfCategory = countOfCategories[3];
   List<Cashback> _selectedCategories = [];
-    String _selectedCardBank = listOfBank[0];
+  String _selectedCardBank = listOfBank[0];
 
   TextEditingController _cardNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -92,6 +92,33 @@ class _AddCardPageState extends State<AddCardPage> {
                       }
                       return null;
                     }),
+                     Row(
+                  children: [
+                    const Expanded(
+                      flex: 2,
+                      child: Text('Выберите банк вашей карты:'),
+                    ),
+                    Expanded(
+                      child: DropdownButton<String>(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        value: _selectedCardBank,
+                        items: listOfBank
+                            .map<DropdownMenuItem<String>>(
+                              (e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(e),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCardBank = value!;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
                 Row(
                   children: [
                     const Expanded(

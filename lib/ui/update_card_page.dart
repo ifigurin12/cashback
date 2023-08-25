@@ -45,7 +45,6 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
   late String _selectedCountOfCategory;
   List<Cashback> _selectedCategories = [];
   
-  String _selectedCardBank = listOfBank[0];
 
   TextEditingController _cardNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -102,33 +101,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                       }
                       return null;
                     }),
-                Row(
-                  children: [
-                    const Expanded(
-                      flex: 3,
-                      child: Text('Выберите банк вашей карты:'),
-                    ),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        value: _selectedCardBank,
-                        items: listOfBank
-                            .map<DropdownMenuItem<String>>(
-                              (e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCardBank = value!;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+               
                  Row(
                   children: [
                     const Expanded(
@@ -219,7 +192,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _userCard = BankCard(
-                        bankType: _selectedCardBank == 'Tinkoff' ? BankType.tinkoff : BankType.alpha,
+                        bankType: widget.userCardToUpdate.bankType,
                         cardName: _cardNameController.text,
                         lastUpdate: DateTime.now(),
                         cashbackCategories: _selectedCategories,
