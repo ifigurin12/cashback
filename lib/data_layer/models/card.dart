@@ -1,30 +1,26 @@
 import 'package:cashback_info/data_layer/models/cashback.dart';
-import 'package:hive/hive.dart';
 
-part 'card.g.dart';
+enum BankType { tinkoff, alpha }
 
-
-@HiveType(typeId: 0)
 class BankCard {
-  @HiveField(0)
-  String bankName;
-  @HiveField(1)
+  String cardName;
+  BankType bankType;
   List<Cashback> cashbackCategories;
-  @HiveField(2)
   DateTime lastUpdate;
 
   BankCard(
-      {required this.bankName,
+      {required this.cardName,
+      required this.bankType,
       required this.cashbackCategories,
       required this.lastUpdate});
 
   @override
   String toString() {
     String cashback = '';
-    for (var item in cashbackCategories) 
-    {
-      cashback += item.name + ' '; 
+    for (var item in cashbackCategories) {
+      cashback += item.name + ' ';
     }
-    return 'Name: $bankName ' + 'cashbacks: $cashback' + 'last update: $lastUpdate\n';
+    return 'Name: $cardName ' 'cashbacks: $cashback' 
+        'last update: $lastUpdate\n';
   }
 }

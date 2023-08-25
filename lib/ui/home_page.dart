@@ -4,18 +4,14 @@ import 'package:cashback_info/data_layer/models/cashback.dart';
 import 'package:cashback_info/ui/add_card_page.dart';
 import 'package:cashback_info/ui/update_card_page.dart';
 
-import 'package:cashback_info/bloc/bank_card_bloc.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomePage extends StatefulWidget {
-    static const String routeName = '/homePage';
+  static const String routeName = '/homePage';
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
   @override
   void initState() {
     super.initState();
@@ -25,46 +21,28 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     List<BankCard> _usersCard = [];
     final _size = MediaQuery.of(context).size;
-    return BlocProvider<BankCardBloc>(
-      create: (context) => BankCardBloc()..add(GetAllBankCardsFromDB()),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Кешбек по картам',
-            style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Кешбек по картам',
+          style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(
+                AddCardPage.routeName,
+              );
+            },
+            icon: Icon(Icons.add),
           ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed(
-                  AddCardPage.routeName,
-                );
-              },
-              icon: Icon(Icons.add),
-            ),
-          ],
-          centerTitle: true,
-        ),
-        body: BlocBuilder<BankCardBloc, BankCardState>(
-          builder: (context, state) {
-            if(state is BankCardInitial) 
-            {
-              return CircularProgressIndicator();
-            }
-            else if (state is GetAllBankCards) 
-            {
-              _usersCard = state.props[0] as List<BankCard>;
-              return ListView.builder(
-              itemCount: _usersCard.length,
-              itemBuilder: (context, index) => showCardInformation(
-                  context, _usersCard[index], _size.width, _size.height),
-            );
-            }
-            else {
-              return Center(child: Text(state.props[0] as String));
-            }
-          },
-        ),
+        ],
+        centerTitle: true,
+      ),
+      body: ListView.builder(
+        itemCount: cardList.length,
+        itemBuilder: (context, index) => showCardInformation(
+            context, cardList[index], _size.width, _size.height),
       ),
     );
   }
@@ -73,7 +51,7 @@ class _HomePageState extends State<HomePage> {
 Widget showCardInformation(
     BuildContext context, BankCard card, double width, double height) {
   return Container(
-    height: height * 0.30,
+    height: card.cashbackCategories.length < 3 ? height * 0.2 : height * 0.25,
     padding: EdgeInsets.all(width * 0.03),
     margin: EdgeInsets.all(width * 0.03),
     decoration: const BoxDecoration(
@@ -99,7 +77,7 @@ Widget showCardInformation(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              card.bankName,
+              card.cardName,
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.white,
@@ -160,35 +138,32 @@ Widget textWithCashbacksInColumn(List<Cashback> cashbacks) {
 }
 
 BankCard cardOne = BankCard(
-  bankName: 'Сбербанк Мама',
+  cardName: 'Тинькофф Мама',
+  bankType: BankType.tinkoff,
   cashbackCategories: [
-    Cashback(name: 'Авто'),
-    Cashback(name: 'АЗС'),
-    Cashback(name: 'Цветы'),
-    Cashback(name: 'Рестораны'),
-    Cashback(name: 'Фастфуд'),
+    Cashback(id: 0, name: 'Авто'),
   ],
   lastUpdate: DateTime.now(),
 );
 BankCard cardTwo = BankCard(
-  bankName: 'Сбербанк Папа',
+  cardName: 'Альфа Папа',
+  bankType: BankType.alpha,
   cashbackCategories: [
-    Cashback(name: 'Авто'),
-    Cashback(name: 'АЗС'),
-    Cashback(name: 'Цветы'),
-    Cashback(name: 'Рестораны'),
-    Cashback(name: 'Фастфуд'),
+    Cashback(id: 2, name: 'Аренда авто'),
+    Cashback(id: 3, name: 'Дом и ремонт'),
   ],
   lastUpdate: DateTime.now(),
 );
 BankCard cardThree = BankCard(
-  bankName: 'Тинькофф Бабушка или сбербанк',
+  cardName: 'Тинькофф Бабушка',
+  bankType: BankType.tinkoff,
   cashbackCategories: [
-    Cashback(name: 'Авто'),
-    Cashback(name: 'АЗС'),
-    Cashback(name: 'Цветы'),
-    Cashback(name: 'Рестораны'),
-    Cashback(name: 'Фастфуд'),
+    Cashback(id: 0, name: 'Авто'),
+    Cashback(id: 1, name: 'АЗС'),
+    Cashback(id: 2, name: 'Аренда авто'),
+    Cashback(id: 3, name: 'Дом и ремонт'),
+    Cashback(id: 4, name: 'Животные'),
+    Cashback(id: 5, name: 'Здоровье'),
   ],
   lastUpdate: DateTime.now(),
 );
