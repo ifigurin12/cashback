@@ -204,6 +204,7 @@ class _AddCardPageState extends State<AddCardPage> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _userCard = BankCard(
+                          id: 0,
                           bankType: _selectedCardBank == 'Tinkoff' ? BankType.tinkoff : BankType.alpha,
                           cardName: _cardNameController.text,
                           lastUpdate: DateTime.now(),

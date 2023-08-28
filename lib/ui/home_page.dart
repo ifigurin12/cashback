@@ -138,6 +138,7 @@ Widget textWithCashbacksInColumn(List<Cashback> cashbacks) {
 }
 
 BankCard cardOne = BankCard(
+  id: 0,
   cardName: 'Тинькофф Мама',
   bankType: BankType.tinkoff,
   cashbackCategories: [
@@ -146,6 +147,7 @@ BankCard cardOne = BankCard(
   lastUpdate: DateTime.now(),
 );
 BankCard cardTwo = BankCard(
+  id: 1,
   cardName: 'Альфа Папа',
   bankType: BankType.alpha,
   cashbackCategories: [
@@ -155,6 +157,7 @@ BankCard cardTwo = BankCard(
   lastUpdate: DateTime.now(),
 );
 BankCard cardThree = BankCard(
+  id: 2,
   cardName: 'Тинькофф Бабушка',
   bankType: BankType.tinkoff,
   cashbackCategories: [

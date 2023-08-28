@@ -192,6 +192,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _userCard = BankCard(
+                        id: 0,
                         bankType: widget.userCardToUpdate.bankType,
                         cardName: _cardNameController.text,
                         lastUpdate: DateTime.now(),
