@@ -1,11 +1,12 @@
-import 'package:cashback_info/data_layer/models/card.dart';
-import 'package:cashback_info/data_layer/models/cashback.dart';
-
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+import 'package:cashback_info/data_layer/models/card.dart';
+import 'package:cashback_info/data_layer/models/cashback.dart';
 
 class DBProvider {
   DBProvider._();
@@ -14,67 +15,77 @@ class DBProvider {
   static late Database _database;
 
   // Таблица с картами
-  String cardTable = 'bank_card';
-  String bankType = 'bank_type';
-  String cardId = 'card_id';
-  String cardName = 'card_name';
-  String lastUpdate = 'card_last_update';
+  final String _cardTable = 'bank_card';
+  final String _bankType = 'bank_type';
+  final String _cardId = 'card_id';
+  final String _cardName = 'card_name';
+  final String _lastUpdate = 'card_last_update';
   // 2 Таблицы с кешбеками для альфа и тинькофф карт
-  String cashbackTinkoffTable = 'tinkoff_cashback';
-  String cashbackAlphaTable = 'alpha_cashback';
-  String categoryId = 'category_id';
-  String categoryName = 'category_name';
+  final String _cashbackTinkoffTable = 'tinkoff_cashback';
+  final String _cashbackAlphaTable = 'alpha_cashback';
+  final String _categoryId = 'category_id';
+  final String _categoryName = 'category_name';
   // 2 Таблицы с сопоставлением id карты и id кешбека
-  String cardTinkoffCashbackTable = 'bank_card_tinkoff_cashback';
-  String bankCardTinkoffCashbackPk = 'bank_card_alpha_cashnack_pk';
-  String cardAlphaCashbackTable = 'bank_card_alpha_cashback';
-  String bankCardAlphaCashbackPk = 'bank_card_alpha_cashback_pk';
-  String idCard = 'card_id';
-  String idCategory = 'category_id';
+  final String _cardTinkoffCashbackTable = 'bank_card_tinkoff_cashback';
+  final String _bankCardTinkoffCashbackPk = 'bank_card_alpha_cashnack_pk';
+  final String _cardAlphaCashbackTable = 'bank_card_alpha_cashback';
+  final String _bankCardAlphaCashbackPk = 'bank_card_alpha_cashback_pk';
+  final String _idCard = 'card_id';
+  final String _idCategory = 'category_id';
+
   Future<Database> get database async {
     _database = await _initDB();
     return _database;
   }
 
   Future<Database> _initDB() async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    String path = dir.path + 'Cards.db';
+    sqfliteFfiInit();
+    Directory dir = Directory.current;
+    String path = 'сards.db';
+    databaseFactory = databaseFactoryFfi;
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
-
+  void clearDB() async{
+    Database db = await database;
+    await db.execute('DROP TABLE $_cardTable');
+    await db.execute('DROP TABLE $_cardTinkoffCashbackTable');
+    await db.execute('DROP TABLE $_cardAlphaCashbackTable');
+  }
   void _createDB(Database db, int version) async {
     await db.execute(
-      '''CREATE TABLE $cardTable($cardId INTEGER PRIMARY KEY AUTOINCREMENT, 
-      $cardName TEXT, 
-      $bankType INTEGER,
-      $lastUpdate TEXT)''',
+      '''CREATE TABLE $_cardTable(
+      $_cardId INTEGER  PRIMARY KEY AUTOINCREMENT, 
+      $_cardName TEXT, 
+      $_bankType INTEGER,
+      $_lastUpdate TEXT
+      )''',
     );
     await db.execute(
-      '''CREATE TABLE $cashbackTinkoffTable($categoryId INTEGER PRIMARY KEY,
-       $categoryName TEXT)''',
+      '''CREATE TABLE $_cashbackTinkoffTable($_categoryId INTEGER PRIMARY KEY,
+       $_categoryName TEXT)''',
     );
     await db.execute(
-      '''CREATE TABLE $cashbackAlphaTable($categoryId INTEGER PRIMARY KEY, 
-      $categoryName TEXT)''',
+      '''CREATE TABLE $_cashbackAlphaTable($_categoryId INTEGER PRIMARY KEY, 
+      $_categoryName TEXT)''',
     );
-    await db.execute('''CREATE TABLE $cardTinkoffCashbackTable(
-      $idCard INTEGER REFERENCES $cardTable($cardId), 
-      $idCategory INTEGER REFERENCES $cashbackTinkoffTable($idCategory), 
-      CONSTRAINT $bankCardTinkoffCashbackPk PRIMARY KEY ($idCard, $idCategory)
-      )',
+    await db.execute('''CREATE TABLE $_cardTinkoffCashbackTable(
+      $_idCard INTEGER REFERENCES $_cardTable($_cardId), 
+      $_idCategory INTEGER REFERENCES $_cashbackTinkoffTable($_idCategory), 
+      CONSTRAINT $_bankCardTinkoffCashbackPk PRIMARY KEY ($_idCard, $_idCategory) 
+      )
     ''');
     await db.execute(
-      '''CREATE TABLE $cardAlphaCashbackTable(
-      $idCard INTEGER REFERENCES $cardTable($cardId), 
-      $idCategory INTEGER REFERENCES $cashbackAlphaTable($idCategory), 
-      CONSTRAINT $bankCardAlphaCashbackPk PRIMARY KEY ($idCard, $idCategory)
+      '''CREATE TABLE $_cardAlphaCashbackTable(
+      $_idCard INTEGER REFERENCES $_cardTable($_cardId), 
+      $_idCategory INTEGER REFERENCES $_cashbackAlphaTable($_idCategory), 
+      CONSTRAINT $_bankCardAlphaCashbackPk PRIMARY KEY ($_idCard, $_idCategory)
        )''',
     );
     Cashback.tinkoffCategoriesOfCashback.forEach(
-      (item) async => await db.insert(cashbackTinkoffTable, item.toJson()),
+      (item) async => await db.insert(_cashbackTinkoffTable, item.toJson()),
     );
     Cashback.alphaCategoriesOfCashback.forEach(
-      (item) async => await db.insert(cashbackTinkoffTable, item.toJson()),
+      (item) async => await db.insert(_cashbackTinkoffTable, item.toJson()),
     );
   }
 
@@ -85,7 +96,7 @@ class DBProvider {
       case 0:
         categories = (
           await db.query(
-            cashbackTinkoffTable,
+            _cashbackTinkoffTable,
             where: '"$categoryId" = ?',
             whereArgs: [categoryId],
           ),
@@ -93,7 +104,7 @@ class DBProvider {
       case 1:
         categories = (
           await db.query(
-            cashbackAlphaTable,
+            _cashbackAlphaTable,
             where: '"$categoryId" = ?',
             whereArgs: [categoryId],
           ),
@@ -101,12 +112,19 @@ class DBProvider {
     }
     return categories;
   }
-
+  Future<List<Map<String, dynamic>>> getCard() async {
+    Database db = await database;
+    return db.query(_cardTable);
+  }
+  Future<List<Map<String, dynamic>>> getCompose() async {
+    Database db = await database;
+    return db.query(_cashbackTinkoffTable);
+  }
   // // READ
-  Future<List<BankCard>> getStudents() async {
+  Future<List<BankCard>> getCards() async {
     Database db = await database;
     List<BankCard> cardList = [];
-    final List<Map<String, dynamic>> cardMapList = await db.query(cardTable);
+    final List<Map<String, dynamic>> cardMapList = await db.query(_cardTable);
     var cashbackIdCategories = [];
     List<Map<String, dynamic>> jsonCashback = [];
 
@@ -114,18 +132,18 @@ class DBProvider {
       switch (jsonCard['bank_type']) {
         case 0:
           cashbackIdCategories = await db.query(
-            cardTinkoffCashbackTable,
-            columns: ['idCategory'],
-            where: '"$idCard" = ?',
+            _cardTinkoffCashbackTable,
+            columns: ['$_idCategory'],
+            where: '"$_idCard" = ?',
             whereArgs: [jsonCard['id']],
           );
           cashbackIdCategories.forEach(
               (id) async => jsonCashback.add(await getCategory(id, 0)));
         case 1:
           cashbackIdCategories = await db.query(
-            cardTinkoffCashbackTable,
-            columns: ['idCategory'],
-            where: '"$idCard" = ?',
+            _cardAlphaCashbackTable,
+            columns: ['$_idCategory'],
+            where: '"$_idCard" = ?',
             whereArgs: [jsonCard['id']],
           );
           cashbackIdCategories.forEach(
@@ -140,18 +158,19 @@ class DBProvider {
   //  INSERT
   Future<BankCard> insertCard(BankCard card) async {
     Database db = await database;
+    db.insert(_cardTable, card.toJson());
     switch (card.bankType) {
       case BankType.tinkoff:
-        card.cashbackCategories.forEach((element) {
-          db.insert(cardTinkoffCashbackTable, element.toJson());
+        card.cashbackCategories.forEach((category) {
+          db.insert(_cardTinkoffCashbackTable,
+              {_idCard: card.id, _idCategory: category.id});
         });
       case BankType.alpha:
-        card.cashbackCategories.forEach((element) {
-          db.insert(cardAlphaCashbackTable, element.toJson());
+        card.cashbackCategories.forEach((category) {
+          db.insert(_cardTinkoffCashbackTable,
+              {_idCard: card.id, _idCategory: category.id});
         });
     }
-    ;
-    db.insert(cardTable, card.toJson());
     return card;
   }
 
