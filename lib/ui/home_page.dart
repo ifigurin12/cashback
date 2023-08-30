@@ -39,11 +39,11 @@ class _HomePageState extends State<HomePage> {
         ],
         centerTitle: true,
       ),
-      body: ListView.builder(
-        itemCount: cardList.length,
-        itemBuilder: (context, index) => showCardInformation(
-            context, cardList[index], _size.width, _size.height),
-      ),
+      // body: ListView.builder(
+      //   itemCount: cardList.length,
+      //   itemBuilder: (context, index) => showCardInformation(
+      //       context, cardList[index], _size.width, _size.height),
+      // ),
     );
   }
 }
@@ -137,42 +137,3 @@ Widget textWithCashbacksInColumn(List<Cashback> cashbacks) {
   );
 }
 
-BankCard cardOne = BankCard(
-  id: 0,
-  cardName: 'Тинькофф Мама',
-  bankType: BankType.tinkoff,
-  cashbackCategories: [
-    Cashback(id: 0, name: 'Авто'),
-  ],
-  lastUpdate: DateTime.now(),
-);
-BankCard cardTwo = BankCard(
-  id: 1,
-  cardName: 'Альфа Папа',
-  bankType: BankType.alpha,
-  cashbackCategories: [
-    Cashback(id: 2, name: 'Аренда авто'),
-    Cashback(id: 3, name: 'Дом и ремонт'),
-  ],
-  lastUpdate: DateTime.now(),
-);
-BankCard cardThree = BankCard(
-  id: 2,
-  cardName: 'Тинькофф Бабушка',
-  bankType: BankType.tinkoff,
-  cashbackCategories: [
-    Cashback(id: 0, name: 'Авто'),
-    Cashback(id: 1, name: 'АЗС'),
-    Cashback(id: 2, name: 'Аренда авто'),
-    Cashback(id: 3, name: 'Дом и ремонт'),
-    Cashback(id: 4, name: 'Животные'),
-    Cashback(id: 5, name: 'Здоровье'),
-  ],
-  lastUpdate: DateTime.now(),
-);
-
-List<BankCard> cardList = [
-  cardOne,
-  cardTwo,
-  cardThree,
-];

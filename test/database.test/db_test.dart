@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('db_crud_test', () {
+  group('db_test', () {
     var dataBase = DBProvider.db;
     List<Cashback> category = [
-      Cashback(id: 0, name: 'Авто'),
-      Cashback(id: 1, name: 'АЗС'),
-      Cashback(id: 2, name: 'Аренда авто'),
-      Cashback(id: 3, name: 'Дом и ремонт'),
+      Cashback(id: 4, name: 'Аренда авто'),
+      Cashback(id: 5, name: 'Детские товары'),
+      Cashback(id: 6, name: 'Дом, ремонт'),
+      Cashback(id: 7, name: 'Ж/д билеты'),
+      Cashback(id: 8, name: 'Животные'),
     ];
     BankCard aga = BankCard(
       id: 0,
@@ -20,37 +21,44 @@ void main() {
       cashbackCategories: category,
       lastUpdate: DateTime.now(),
     );
-    // test('aga', () async {
-    //   final perCard = await dataBase.getCard();
-    //   final perCompose = await dataBase.getCompose();
-    //   BankCard test = await dataBase.insertCard(aga);
-    //   expect(test, aga);
-    //   perCard.forEach(
-    //     (element) => print(element),
-    //   );
-    //   perCompose.forEach(
-    //     (element) => print(element),
-    //   );
-    // });
+    test(
+      'db_delete_test',
+      () async {
+        List<BankCard> listCard = [];
+        listCard = await dataBase.getCards();
+        for (BankCard card in listCard) {
+          await dataBase.deleteCard(card);
+        }
+        listCard.clear();
+        listCard = await dataBase.getCards();
+        expect(listCard, []);
+      },
+    );
 
-    test('add value test', () async {
-      BankCard test = await dataBase.insertCard(aga);
-      expect(test, aga);
-      final perCard = await dataBase.getCard();
-      perCard.forEach((element) {
-        print('loh');
-        print(element);
-      });
+    test(
+      'db_read_and_add_test',
+      () async {
+        final id = await dataBase.insertCard(aga);
+        aga.id = id;
+        final listCard = await dataBase.getCards();
+        final card = listCard.firstWhere((element) => element.id == id);
+        expect(card, aga);
+      },
+    );
+
+    test('db_update_test', () async {
+      final id = await dataBase.insertCard(aga);
+      aga.id = id;
+      category = [
+        Cashback(id: 9, name: 'Искусство'),
+        Cashback(id: 10, name: 'Канцтовары'),
+        Cashback(id: 11, name: 'Каршеринг'),
+      ];
+      aga.cashbackCategories = category;
+      await dataBase.updateCard(aga);
+      final listCard = await dataBase.getCards();
+      final card = listCard.firstWhere((element) => element.id == id); 
+      expect(card, aga);
     });
-    // test('get cards list test', () async {
-    //   List<BankCard> testList = await dataBase.getCards();
-    //   testList.forEach((element) => print(element.toString()),);
-    //   expect(1, 1);
-    // });
-
-    // test() async {
-    //   List<BankCard> cardList = await dataBase.getCards();
-    //   expect(cardList, [aga]);
-    // }
   });
 }

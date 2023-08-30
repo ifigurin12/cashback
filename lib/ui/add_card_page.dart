@@ -92,7 +92,7 @@ class _AddCardPageState extends State<AddCardPage> {
                       }
                       return null;
                     }),
-                     Row(
+                Row(
                   children: [
                     const Expanded(
                       flex: 2,
@@ -205,7 +205,9 @@ class _AddCardPageState extends State<AddCardPage> {
                     if (_formKey.currentState!.validate()) {
                       _userCard = BankCard(
                           id: 0,
-                          bankType: _selectedCardBank == 'Tinkoff' ? BankType.tinkoff : BankType.alpha,
+                          bankType: _selectedCardBank == 'Tinkoff'
+                              ? BankType.tinkoff
+                              : BankType.alpha,
                           cardName: _cardNameController.text,
                           lastUpdate: DateTime.now(),
                           cashbackCategories: _selectedCategories);

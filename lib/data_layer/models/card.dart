@@ -1,23 +1,24 @@
 import 'dart:convert';
+import 'package:equatable/equatable.dart';
 
 import 'package:cashback_info/data_layer/models/cashback.dart';
-import 'package:cashback_info/ui/update_card_page.dart';
 
 enum BankType { tinkoff, alpha }
 
-class BankCard {
+class BankCard extends Equatable {
   int id;
   String cardName;
   BankType bankType;
   List<Cashback> cashbackCategories;
   DateTime lastUpdate;
 
-  BankCard(
-      {required this.cardName,
-      required this.id,
-      required this.bankType,
-      required this.cashbackCategories,
-      required this.lastUpdate});
+  BankCard({
+    required this.id,
+    required this.cardName,
+    required this.bankType,
+    required this.cashbackCategories,
+    required this.lastUpdate,
+  });
 
   Map<String, dynamic> toJson() {
     final jsonMap = Map<String, dynamic>();
@@ -27,9 +28,16 @@ class BankCard {
     return jsonMap;
   }
 
-  factory BankCard.fromJson(
-      Map<String, dynamic> jsonCard, List<Map<String, dynamic>> jsonCashbackList) {
-    final id = jsonCard['id'];
+  Map<String, dynamic> toJsonWithoutBankType() {
+    final jsonMap = Map<String, dynamic>();
+    jsonMap['card_name'] = cardName;
+    jsonMap['card_last_update'] = DateTime.now().toString();
+    return jsonMap;
+  }
+
+  factory BankCard.fromJson(Map<String, dynamic> jsonCard,
+      List<Map<String, dynamic>> jsonCashbackList) {
+    final id = jsonCard['card_id'];
     final cardName = jsonCard['card_name'];
     final bankType =
         jsonCard['bank_type'] == 0 ? BankType.tinkoff : BankType.alpha;
@@ -39,11 +47,12 @@ class BankCard {
       (element) => cashbackCategories.add(Cashback.fromJson(element)),
     );
     return BankCard(
-        cardName: cardName,
-        id: id,
-        bankType: bankType,
-        cashbackCategories: cashbackCategories,
-        lastUpdate: lastUpdate);
+      cardName: cardName,
+      bankType: bankType,
+      cashbackCategories: cashbackCategories,
+      lastUpdate: lastUpdate,
+      id: id,
+    );
   }
   @override
   String toString() {
@@ -55,4 +64,8 @@ class BankCard {
         'cashbacks: $cashback'
         'last update: $lastUpdate\n';
   }
+
+  @override
+  List<Object> get props =>
+      [id, cardName, bankType, cashbackCategories, lastUpdate];
 }

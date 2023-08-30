@@ -1,10 +1,6 @@
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
 
@@ -45,12 +41,7 @@ class DBProvider {
     databaseFactory = databaseFactoryFfi;
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
-  void clearDB() async{
-    Database db = await database;
-    await db.execute('DROP TABLE $_cardTable');
-    await db.execute('DROP TABLE $_cardTinkoffCashbackTable');
-    await db.execute('DROP TABLE $_cardAlphaCashbackTable');
-  }
+
   void _createDB(Database db, int version) async {
     await db.execute(
       '''CREATE TABLE $_cardTable(
@@ -85,113 +76,161 @@ class DBProvider {
       (item) async => await db.insert(_cashbackTinkoffTable, item.toJson()),
     );
     Cashback.alphaCategoriesOfCashback.forEach(
-      (item) async => await db.insert(_cashbackTinkoffTable, item.toJson()),
+      (item) async => await db.insert(_cashbackAlphaTable, item.toJson()),
     );
   }
 
-  Future<Map<String, dynamic>> getCategory(int categoryId, int bankType) async {
+  Future<List<Map<String, dynamic>>> getCategory(
+      int categoryId, int bankType) async {
     Database db = await database;
-    Map<String, dynamic> categories = {};
     switch (bankType) {
       case 0:
-        categories = (
-          await db.query(
-            _cashbackTinkoffTable,
-            where: '"$categoryId" = ?',
-            whereArgs: [categoryId],
-          ),
-        ) as Map<String, dynamic>;
+        return await db.rawQuery(
+          'SELECT* FROM $_cashbackTinkoffTable WHERE $_categoryId = ?',
+          [categoryId],
+        );
+
       case 1:
-        categories = (
-          await db.query(
-            _cashbackAlphaTable,
-            where: '"$categoryId" = ?',
-            whereArgs: [categoryId],
-          ),
-        ) as Map<String, dynamic>;
+        return await db.rawQuery(
+          'SELECT* FROM $_cashbackAlphaTable WHERE $_categoryId = ?',
+          [categoryId],
+        );
+      default:
+        return [];
     }
-    return categories;
   }
-  Future<List<Map<String, dynamic>>> getCard() async {
-    Database db = await database;
-    return db.query(_cardTable);
-  }
-  Future<List<Map<String, dynamic>>> getCompose() async {
-    Database db = await database;
-    return db.query(_cashbackTinkoffTable);
-  }
+
   // // READ
   Future<List<BankCard>> getCards() async {
     Database db = await database;
-    List<BankCard> cardList = [];
-    final List<Map<String, dynamic>> cardMapList = await db.query(_cardTable);
-    var cashbackIdCategories = [];
-    List<Map<String, dynamic>> jsonCashback = [];
 
-    cardMapList.forEach((jsonCard) async {
+    List<BankCard> cardList = []; // Result of request
+
+    List<Map<String, dynamic>> cardMapList =
+        await db.query(_cardTable); // select bank_card
+    List<Map<String, dynamic>> cashbackIdCategories =
+        []; // category_id with card_id
+    List<Map<String, dynamic>> jsonCashbackList =
+        []; // json for cashback initialize
+    List<Map<String, dynamic>> jsonCashbackOne = [];
+
+    for (Map<String, dynamic> jsonCard in cardMapList) {
+      jsonCashbackList.clear();
       switch (jsonCard['bank_type']) {
         case 0:
           cashbackIdCategories = await db.query(
             _cardTinkoffCashbackTable,
-            columns: ['$_idCategory'],
-            where: '"$_idCard" = ?',
-            whereArgs: [jsonCard['id']],
+            columns: [_idCategory],
+            where: '$_idCard = ?',
+            whereArgs: [jsonCard[_cardId]],
           );
-          cashbackIdCategories.forEach(
-              (id) async => jsonCashback.add(await getCategory(id, 0)));
+          for (Map<String, dynamic> id in cashbackIdCategories) {
+            jsonCashbackOne = await getCategory(id[_idCategory], 0);
+            jsonCashbackList.add(jsonCashbackOne[0]);
+          }
         case 1:
           cashbackIdCategories = await db.query(
             _cardAlphaCashbackTable,
-            columns: ['$_idCategory'],
-            where: '"$_idCard" = ?',
-            whereArgs: [jsonCard['id']],
+            columns: [_idCategory],
+            where: '$_idCard = ?',
+            whereArgs: [jsonCard[_cardId]],
           );
-          cashbackIdCategories.forEach(
-              (id) async => jsonCashback.add(await getCategory(id, 1)));
+
+          for (Map<String, dynamic> id in cashbackIdCategories) {
+            jsonCashbackOne = await getCategory(id[_idCategory], 1);
+            jsonCashbackList.add(jsonCashbackOne[0]);
+          }
       }
-      cardList.add(BankCard.fromJson(jsonCard, jsonCashback));
-      jsonCashback.clear();
-    });
+      cardList.add(BankCard.fromJson(jsonCard, jsonCashbackList));
+    }
     return cardList;
   }
 
   //  INSERT
-  Future<BankCard> insertCard(BankCard card) async {
+  Future<int> insertCard(BankCard card) async {
     Database db = await database;
-    db.insert(_cardTable, card.toJson());
+    Map<String, dynamic> cardJson = card.toJson();
+    final id = await db.rawInsert('''INSERT INTO 
+    $_cardTable($_cardName, $_bankType, $_lastUpdate) 
+    VALUES(?, ?, ?)''', [
+      cardJson['card_name'],
+      cardJson['bank_type'],
+      cardJson['card_last_update']
+    ]);
+
     switch (card.bankType) {
       case BankType.tinkoff:
-        card.cashbackCategories.forEach((category) {
-          db.insert(_cardTinkoffCashbackTable,
-              {_idCard: card.id, _idCategory: category.id});
-        });
+        for (Cashback category in card.cashbackCategories) {
+          await db.insert(
+            _cardTinkoffCashbackTable,
+            {_idCard: id, _idCategory: category.id},
+          );
+        }
       case BankType.alpha:
-        card.cashbackCategories.forEach((category) {
-          db.insert(_cardTinkoffCashbackTable,
-              {_idCard: card.id, _idCategory: category.id});
-        });
+        for (Cashback category in card.cashbackCategories) {
+          await db.insert(
+            _cardAlphaCashbackTable,
+            {_idCard: id, _idCategory: category.id},
+          );
+        }
     }
-    return card;
+    return id;
   }
 
-  // //UPDATE
-  // Future<int> updateStudent(Student student) async {
-  //   Database db = await this.database;
-  //   return await db.update(
-  //     studentsTable,
-  //     student.toMap(),
-  //     where: '$columnId = ?',
-  //     whereArgs: [student.id],
-  //   );
-  // }
+  //UPDATE
+  Future<int> updateCard(BankCard card) async {
+    Database db = await database;
+    switch (card.bankType) {
+      case BankType.tinkoff:
+        await db.rawDelete(
+          '''DELETE FROM  $_cardTinkoffCashbackTable WHERE $_idCard = ? ''',
+          [card.id],
+        );
+        for (Cashback cashback in card.cashbackCategories) {
+          await db.rawInsert(
+            '''INSERT INTO $_cardTinkoffCashbackTable ($_idCard, $_idCategory) VALUES (?, ?); ''',
+            [card.id, cashback.id],
+          );
+        }
+      case BankType.alpha:
+        await db.rawDelete(
+          '''DELETE FROM  $_cardAlphaCashbackTable WHERE $_idCard = ? ''',
+          [card.id],
+        );
+        for (Cashback cashback in card.cashbackCategories) {
+          await db.rawInsert(
+            '''INSERT INTO $_cardAlphaCashbackTable ($_idCard, $_idCategory) VALUES (?, ?); ''',
+            [card.id, cashback.id],
+          );
+        }
+    }
+    return await db.update(
+      _cardTable,
+      card.toJson(),
+      where: '$_idCard = ?',
+      whereArgs: [card.id],
+    );
+  }
 
-  // //DELETE
-  // Future<int> deleteStudent(int? id) async {
-  //   Database db = await this.database;
-  //   return await db.delete(
-  //     studentsTable,
-  //     where: '$columnId = ?',
-  //     whereArgs: [id],
-  //   );
-  // }
+  //DELETE
+  Future<int> deleteCard(BankCard card) async {
+    Database db = await database;
+    switch (card.bankType) {
+      case BankType.tinkoff:
+        await db.rawDelete(
+          '''DELETE FROM  $_cardTinkoffCashbackTable WHERE $_idCard = ? ''',
+          [card.id],
+        );
+      case BankType.alpha:
+        await db.rawDelete(
+          '''DELETE FROM  $_cardAlphaCashbackTable WHERE $_idCard = ? ''',
+          [card.id],
+        );
+    }
+    return await db.delete(
+      _cardTable,
+      where: '$_idCard = ?',
+      whereArgs: [card.id],
+    );
+  }
 }

@@ -1,6 +1,8 @@
+import 'package:equatable/equatable.dart';
+
 import 'card.dart';
 
-class Cashback {
+class Cashback extends Equatable{
   int id;
   String name;
 
@@ -82,4 +84,8 @@ class Cashback {
     Cashback(id: 31, name: 'Цветы'),
     Cashback(id: 32, name: 'Электроника и техника'),
   ];
+  
+  @override
+  // TODO: implement props
+  List<Object?> get props => [id, name];
 }
