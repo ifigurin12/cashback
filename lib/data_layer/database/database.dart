@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
+
 
 class DBProvider {
   DBProvider._();
@@ -35,10 +37,8 @@ class DBProvider {
   }
 
   Future<Database> _initDB() async {
-    sqfliteFfiInit();
-    Directory dir = Directory.current;
-    String path = 'сards.db';
-    databaseFactory = databaseFactoryFfi;
+    Directory dir = await getApplicationDocumentsDirectory();
+    String path = dir.path + 'cards.db';
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 

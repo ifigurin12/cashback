@@ -1,35 +1,12 @@
+import 'package:cashback_info/bloc/add_card_bloc/add_card_bloc_bloc.dart';
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
+import 'package:cashback_info/ui/home_page.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-List<Cashback> categoriesOfCashback = [
-  Cashback(id: 0, name: 'Авто'),
-  Cashback(id: 1, name: 'АЗС'),
-  Cashback(id: 2, name: 'Аренда авто'),
-  Cashback(id: 3, name: 'Дом и ремонт'),
-  Cashback(id: 4, name: 'Животные'),
-  Cashback(id: 5, name: 'Здоровье'),
-  Cashback(id: 6, name: 'Кафе и рестораны'),
-  Cashback(id: 7, name: 'Книги'),
-  Cashback(id: 8, name: 'Коммунальные услуги'),
-  Cashback(id: 9, name: 'Красота'),
-  Cashback(id: 10, name: 'Образование'),
-  Cashback(id: 11, name: 'Одежда и обувь'),
-  Cashback(id: 12, name: 'Путешествия'),
-  Cashback(id: 13, name: 'Развлечения'),
-  Cashback(id: 14, name: 'Связь, интернет и ТВ'),
-  Cashback(id: 15, name: 'Спортивные товары'),
-  Cashback(id: 16, name: 'Супермаркеты'),
-  Cashback(id: 17, name: 'Такси'),
-  Cashback(id: 18, name: 'Техника'),
-  Cashback(id: 19, name: 'Транспорт'),
-  Cashback(id: 20, name: 'Фастфуд'),
-  Cashback(id: 21, name: 'Цветы'),
-  Cashback(id: 22, name: 'Цифровые товары'),
-  Cashback(id: 23, name: 'Ювелирные изделия'),
-];
 List<String> listOfBank = ['Tinkoff Bank', 'Alpha Bank'];
 List<String> countOfCategories = ['1', '2', '3', '4', '5', '6'];
 
@@ -40,6 +17,7 @@ class AddCardPage extends StatefulWidget {
 }
 
 class _AddCardPageState extends State<AddCardPage> {
+  List<Cashback> categoriesOfCashback = [];
   String _selectedCountOfCategory = countOfCategories[3];
   List<Cashback> _selectedCategories = [];
   String _selectedCardBank = listOfBank[0];
@@ -52,7 +30,11 @@ class _AddCardPageState extends State<AddCardPage> {
   @override
   void initState() {
     _selectedCategories = List.filled(
-        int.parse(_selectedCountOfCategory), categoriesOfCashback[0]);
+      int.parse(_selectedCountOfCategory),
+      _selectedCardBank == listOfBank[0]
+          ? Cashback.tinkoffCategoriesOfCashback[0]
+          : Cashback.alphaCategoriesOfCashback[0],
+    );
     super.initState();
   }
 
@@ -113,6 +95,12 @@ class _AddCardPageState extends State<AddCardPage> {
                         onChanged: (value) {
                           setState(() {
                             _selectedCardBank = value!;
+                            _selectedCategories = List.filled(
+                              int.parse(_selectedCountOfCategory),
+                              _selectedCardBank == listOfBank[0]
+                                  ? Cashback.tinkoffCategoriesOfCashback[0]
+                                  : Cashback.alphaCategoriesOfCashback[0],
+                            );
                           });
                         },
                       ),
@@ -141,8 +129,11 @@ class _AddCardPageState extends State<AddCardPage> {
                           setState(() {
                             _selectedCountOfCategory = value!;
                             _selectedCategories = List.filled(
-                                int.parse(_selectedCountOfCategory),
-                                categoriesOfCashback[0]);
+                              int.parse(_selectedCountOfCategory),
+                              _selectedCardBank == listOfBank[0]
+                                  ? Cashback.tinkoffCategoriesOfCashback[0]
+                                  : Cashback.alphaCategoriesOfCashback[0],
+                            );
                           });
                         },
                       ),
@@ -177,18 +168,32 @@ class _AddCardPageState extends State<AddCardPage> {
                           }
                         },
                         value: _selectedCategories[index].name,
-                        items: categoriesOfCashback
-                            .map<DropdownMenuItem<String>>(
-                              (e) => DropdownMenuItem(
-                                child: Text(e.name),
-                                value: e.name,
-                              ),
-                            )
-                            .toList(),
+                        items: _selectedCardBank == listOfBank[0]
+                            ? Cashback.tinkoffCategoriesOfCashback
+                                .map<DropdownMenuItem<String>>(
+                                  (e) => DropdownMenuItem(
+                                    child: Text(e.name),
+                                    value: e.name,
+                                  ),
+                                )
+                                .toList()
+                            : Cashback.alphaCategoriesOfCashback
+                                .map<DropdownMenuItem<String>>(
+                                  (e) => DropdownMenuItem(
+                                    child: Text(e.name),
+                                    value: e.name,
+                                  ),
+                                )
+                                .toList(),
                         onChanged: (value) {
                           setState(() {
-                            _selectedCategories[index] = categoriesOfCashback
-                                .firstWhere((element) => element.name == value);
+                            _selectedCategories[index] = _selectedCardBank ==
+                                    listOfBank[0]
+                                ? Cashback.tinkoffCategoriesOfCashback
+                                    .firstWhere(
+                                        (element) => element.name == value)
+                                : Cashback.alphaCategoriesOfCashback.firstWhere(
+                                    (element) => element.name == value);
                           });
                         },
                       ),
@@ -201,34 +206,67 @@ class _AddCardPageState extends State<AddCardPage> {
                   },
                 ),
                 ElevatedButton(
+                  child: const Text('Добавить'),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _userCard = BankCard(
-                          id: 0,
-                          bankType: _selectedCardBank == 'Tinkoff'
-                              ? BankType.tinkoff
-                              : BankType.alpha,
-                          cardName: _cardNameController.text,
-                          lastUpdate: DateTime.now(),
-                          cashbackCategories: _selectedCategories);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          duration: Duration(seconds: 1),
-                          backgroundColor: Colors.green,
-                          content: Text(
-                            'Добавление карты выполнено успешно',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18.0,
-                            ),
-                          ),
-                        ),
+                        id: 0,
+                        bankType: _selectedCardBank == listOfBank[0]
+                            ? BankType.tinkoff
+                            : BankType.alpha,
+                        cardName: _cardNameController.text,
+                        lastUpdate: DateTime.now(),
+                        cashbackCategories: _selectedCategories,
                       );
-                      Navigator.of(context).pop();
+                      BlocProvider.of<AddCardBloc>(context).add(
+                        AddCardToDb(card: _userCard),
+                      );
                     }
                   },
-                  child: Text('Ввести'),
+                ),
+                BlocConsumer<AddCardBloc, AddCardBlocState>(
+                  listener: (context, state) {
+                    if (state is AddCardBlocInitial) {
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is AddCardBlocInitial) {
+                      return SizedBox();
+                    } else if (state is AddCardBlocLoading) {
+                      return CircularProgressIndicator();
+                    } else if (state is AddCardBlocSuccess) {
+                      return AlertDialog(
+                        title: const Text('Успешно'),
+                        content: const Text('Карта была добавлена успешно'),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () => Navigator.pop(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        HomePage(),
+                              ),
+                            ),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Center(
+                        child: AlertDialog(
+                          title: const Text('Ошибка'),
+                          content: const Text('Ваша карта не была добавлена'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),
