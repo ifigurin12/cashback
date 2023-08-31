@@ -97,7 +97,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Пожалуйста введие название карты';
+                        return 'Пожалуйста введите название карты';
                       }
                       return null;
                     }),

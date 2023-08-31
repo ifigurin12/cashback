@@ -6,3 +6,12 @@ sealed class DeleteCardBlocEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+class DeleteCardFromDb extends DeleteCardBlocEvent{
+  BankCard userCard; 
+
+  DeleteCardFromDb({required this.userCard});
+
+  @override
+  List<Object> get props => [userCard];
+}

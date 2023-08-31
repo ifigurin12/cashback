@@ -9,10 +9,9 @@ import 'package:cashback_info/ui/update_card_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatelessWidget with RouteAware{
+class HomePage extends StatelessWidget with RouteAware {
   late List<BankCard> _userCardList;
   static const String routeName = '/homePage';
-
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +37,7 @@ class HomePage extends StatelessWidget with RouteAware{
         centerTitle: true,
       ),
       body: BlocConsumer<ReadCardsBloc, ReadCardsBlocState>(
-        listener: (context, state) {
-          
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           if (state is ReadCardsBlocInitial) {
             return const Center(
@@ -140,12 +137,54 @@ Widget showCardInformation(
                 color: Colors.white,
               ),
             ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.delete,
-                color: Colors.redAccent,
-                size: 30,
+            BlocListener<DeleteCardBloc, DeleteCardBlocState>(
+              listener: (context, state) {
+                if (state is DeleteCardBlocFailure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(seconds: 1),
+                      backgroundColor: Colors.red,
+                      content: Text(
+                        'Удалени карты выполнено с ошибкой',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.0,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                if (state is DeleteCardBlocSuccess) 
+                {
+                   ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(seconds: 1),
+                      backgroundColor: Colors.green,
+                      content: Text(
+                        'Удалени карты выполнено успешно',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.0,
+                        ),
+                      ),
+                    ),
+                  );
+                  context.read<ReadCardsBloc>().add(ReadCardList());
+                }
+              },
+              child: IconButton(
+                onPressed: () {
+                  context
+                      .read<DeleteCardBloc>()
+                      .add(DeleteCardFromDb(userCard: card));
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.redAccent,
+                  size: 30,
+                ),
               ),
             ),
           ],
