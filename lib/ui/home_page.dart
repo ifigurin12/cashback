@@ -1,3 +1,4 @@
+import 'package:cashback_info/bloc/delete_card_bloc/delete_card_bloc_bloc.dart';
 import 'package:cashback_info/bloc/read_cards_bloc/read_cards_bloc_bloc.dart';
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
@@ -8,21 +9,14 @@ import 'package:cashback_info/ui/update_card_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatefulWidget {
-  static const String routeName = '/homePage';
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
+class HomePage extends StatelessWidget with RouteAware{
   late List<BankCard> _userCardList;
-  @override
-  void initState() {
-    BlocProvider.of<ReadCardsBloc>(context).add(ReadCardList());
-    super.initState();
-  }
+  static const String routeName = '/homePage';
+
 
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<ReadCardsBloc>();
     List<BankCard> _usersCard = [];
     final _size = MediaQuery.of(context).size;
     return Scaffold(
@@ -45,43 +39,40 @@ class _HomePageState extends State<HomePage> {
       ),
       body: BlocConsumer<ReadCardsBloc, ReadCardsBlocState>(
         listener: (context, state) {
-          BlocProvider.of<ReadCardsBloc>(context).add(
-            ReadCardList(),
-          );
+          
         },
         builder: (context, state) {
-          switch (state) {
-            case ReadCardsBlocInitial():
-              return const Center(
-                child: Text('aga'),
-              );
-            case ReadCardsBlocLoading():
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            case ReadCardsBlocSuccess():
-              _userCardList = state.props[0] as List<BankCard>;
-              return ListView.builder(
-                itemCount: _userCardList.length,
-                itemBuilder: (context, index) => showCardInformation(
-                  context,
-                  _userCardList[index],
-                  _size.width,
-                  _size.height,
-                ),
-              );
-            case ReadCardsBlocEmpty():
-              return const Center(
-                child: Text(
-                  'Вы пока не добавили ни одной карты в приложение',
-                ),
-              );
-            case ReadCardsBlocFailure():
-              return const Center(
-                child: Text(
-                  'Загрузка данных завершена с ошибкой, приносим свои изменения(',
-                ),
-              );
+          if (state is ReadCardsBlocInitial) {
+            return const Center(
+              child: Text('aga'),
+            );
+          } else if (state is ReadCardsBlocLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (state is ReadCardsBlocSuccess) {
+            _userCardList = state.props[0] as List<BankCard>;
+            return ListView.builder(
+              itemCount: _userCardList.length,
+              itemBuilder: (context, index) => showCardInformation(
+                context,
+                _userCardList[index],
+                _size.width,
+                _size.height,
+              ),
+            );
+          } else if (state is ReadCardsBlocEmpty) {
+            return const Center(
+              child: Text(
+                'Вы пока не добавили ни одной карты в приложение',
+              ),
+            );
+          } else {
+            return const Center(
+              child: Text(
+                'Загрузка данных завершена с ошибкой, приносим свои изменения(',
+              ),
+            );
           }
         },
       ),

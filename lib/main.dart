@@ -12,12 +12,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'data_layer/models/cashback.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  MyApp({super.key});
+  final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -35,11 +35,22 @@ class MyApp extends StatelessWidget {
             case HomePage.routeName:
               return PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
+                    MultiBlocProvider(
+                  providers: [
                     BlocProvider<ReadCardsBloc>(
-                  create: (BuildContext context) => ReadCardsBloc()
-                    ..add(
-                      ReadCardList(),
+                      create: (context) {
+                        ReadCardsBloc readCardsBloc = ReadCardsBloc();
+                        readCardsBloc.add(ReadCardList());
+                        return readCardsBloc;
+                      },
                     ),
+                    BlocProvider<DeleteCardBloc>(
+                      create: (context) {
+                        DeleteCardBloc deleteCardsBloc = DeleteCardBloc();
+                        return deleteCardsBloc;
+                      },
+                    ),
+                  ],
                   child: HomePage(),
                 ),
               );

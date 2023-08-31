@@ -224,11 +224,7 @@ class _AddCardPageState extends State<AddCardPage> {
                     }
                   },
                 ),
-                BlocConsumer<AddCardBloc, AddCardBlocState>(
-                  listener: (context, state) {
-                    if (state is AddCardBlocInitial) {
-                    }
-                  },
+                BlocBuilder<AddCardBloc, AddCardBlocState>(
                   builder: (context, state) {
                     if (state is AddCardBlocInitial) {
                       return SizedBox();
@@ -240,13 +236,9 @@ class _AddCardPageState extends State<AddCardPage> {
                         content: const Text('Карта была добавлена успешно'),
                         actions: <Widget>[
                           TextButton(
-                            onPressed: () => Navigator.pop(
+                            onPressed: () => Navigator.pushNamed(
                               context,
-                              PageRouteBuilder(
-                                pageBuilder:
-                                    (context, animation, secondaryAnimation) =>
-                                        HomePage(),
-                              ),
+                              HomePage.routeName,
                             ),
                             child: const Text('OK'),
                           ),

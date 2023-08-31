@@ -9,10 +9,10 @@ part 'read_cards_bloc_state.dart';
 class ReadCardsBloc extends Bloc<ReadCardsBlocEvent, ReadCardsBlocState> {
   final dataBase = DBProvider.db;
   ReadCardsBloc() : super(ReadCardsBlocInitial()) {
-    on<ReadCardList>((event, emit) => _onGetCardList);
+    on<ReadCardList>(_onGetCardList);
   }
    _onGetCardList(ReadCardsBlocEvent event, Emitter<ReadCardsBlocState> emit) async {
-    emit((ReadCardsBlocLoading()));
+    emit(ReadCardsBlocLoading());
     final list = await dataBase.getCards();
     if (list.isEmpty) {
       emit(ReadCardsBlocEmpty());
