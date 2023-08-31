@@ -8,3 +8,6 @@ sealed class UpdateCardBlocState extends Equatable {
 }
 
 final class UpdateCardBlocInitial extends UpdateCardBlocState {}
+final class UpdateCardBlocLoading extends UpdateCardBlocState {}
+final class UpdateCardBlocSuccess extends UpdateCardBlocState {}
+final class UpdateCardBlocFailure extends UpdateCardBlocState {}

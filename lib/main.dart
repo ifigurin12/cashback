@@ -1,6 +1,7 @@
 import 'package:cashback_info/bloc/add_card_bloc/add_card_bloc_bloc.dart';
 import 'package:cashback_info/bloc/delete_card_bloc/delete_card_bloc_bloc.dart';
 import 'package:cashback_info/bloc/read_cards_bloc/read_cards_bloc_bloc.dart';
+import 'package:cashback_info/bloc/update_card_bloc/update_card_bloc_bloc.dart';
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/ui/add_card_page.dart';
 import 'package:cashback_info/ui/home_page.dart';
@@ -17,7 +18,8 @@ void main() {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+  final RouteObserver<ModalRoute<void>> routeObserver =
+      RouteObserver<ModalRoute<void>>();
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -55,10 +57,13 @@ class MyApp extends StatelessWidget {
                 ),
               );
             case UpdateCardPage.routeName:
-              final arg = settings.arguments as BankCard;
+              final card = settings.arguments as BankCard;
               return PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
-                      UpdateCardPage(userCardToUpdate: arg));
+                      BlocProvider(
+                        create: (context) => UpdateCardBloc(),
+                        child: UpdateCardPage(userCardToUpdate: card),
+                      ));
             case AddCardPage.routeName:
               return PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>

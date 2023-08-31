@@ -6,14 +6,13 @@ import 'package:cashback_info/data_layer/models/cashback.dart';
 enum BankType { tinkoff, alpha }
 
 class BankCard extends Equatable {
-  int id;
+  int? id;
   String cardName;
   BankType bankType;
   List<Cashback> cashbackCategories;
   DateTime lastUpdate;
 
-  BankCard({
-    required this.id,
+  BankCard({this.id,
     required this.cardName,
     required this.bankType,
     required this.cashbackCategories,
@@ -67,5 +66,5 @@ class BankCard extends Equatable {
 
   @override
   List<Object> get props =>
-      [id, cardName, bankType, cashbackCategories, lastUpdate];
+      [id!, cardName, bankType, cashbackCategories, lastUpdate];
 }

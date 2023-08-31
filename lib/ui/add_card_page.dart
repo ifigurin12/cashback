@@ -205,60 +205,62 @@ class _AddCardPageState extends State<AddCardPage> {
                     );
                   },
                 ),
-                ElevatedButton(
-                  child: const Text('Добавить'),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _userCard = BankCard(
-                        id: 0,
-                        bankType: _selectedCardBank == listOfBank[0]
-                            ? BankType.tinkoff
-                            : BankType.alpha,
-                        cardName: _cardNameController.text,
-                        lastUpdate: DateTime.now(),
-                        cashbackCategories: _selectedCategories,
-                      );
-                      BlocProvider.of<AddCardBloc>(context).add(
-                        AddCardToDb(card: _userCard),
-                      );
-                    }
-                  },
-                ),
-                BlocBuilder<AddCardBloc, AddCardBlocState>(
-                  builder: (context, state) {
-                    if (state is AddCardBlocInitial) {
-                      return SizedBox();
-                    } else if (state is AddCardBlocLoading) {
-                      return CircularProgressIndicator();
-                    } else if (state is AddCardBlocSuccess) {
-                      return AlertDialog(
-                        title: const Text('Успешно'),
-                        content: const Text('Карта была добавлена успешно'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => Navigator.pushNamed(
-                              context,
-                              HomePage.routeName,
+                BlocListener<AddCardBloc, AddCardBlocState>(
+                  listener: (context, state) {
+                    if (state is AddCardBlocSuccess) 
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          duration: Duration(seconds: 1),
+                          backgroundColor: Colors.green,
+                          content: Text(
+                            'Карта успешно добавлена',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18.0,
                             ),
-                            child: const Text('OK'),
                           ),
-                        ],
+                        ),
                       );
-                    } else {
-                      return Center(
-                        child: AlertDialog(
-                          title: const Text('Ошибка'),
-                          content: const Text('Ваша карта не была добавлена'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text('OK'),
+                      Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+                    }
+                    if (state is AddCardBlocFailure) 
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          duration: Duration(seconds: 1),
+                          backgroundColor: Colors.red,
+                          content: Text(
+                            'Добавление карты вызвало ошибку',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18.0,
                             ),
-                          ],
+                          ),
                         ),
                       );
                     }
                   },
+                  child: ElevatedButton(
+                    child: const Text('Добавить'),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _userCard = BankCard(
+                          bankType: _selectedCardBank == listOfBank[0]
+                              ? BankType.tinkoff
+                              : BankType.alpha,
+                          cardName: _cardNameController.text,
+                          lastUpdate: DateTime.now(),
+                          cashbackCategories: _selectedCategories,
+                        );
+                        BlocProvider.of<AddCardBloc>(context).add(
+                          AddCardToDb(card: _userCard),
+                        );
+                      }
+                    },
+                  ),
                 ),
               ],
             ),

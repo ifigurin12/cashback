@@ -145,7 +145,7 @@ Widget showCardInformation(
                       duration: Duration(seconds: 1),
                       backgroundColor: Colors.red,
                       content: Text(
-                        'Удалени карты выполнено с ошибкой',
+                        'Удаление карты выполнено с ошибкой',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -162,7 +162,7 @@ Widget showCardInformation(
                       duration: Duration(seconds: 1),
                       backgroundColor: Colors.green,
                       content: Text(
-                        'Удалени карты выполнено успешно',
+                        'Удаление карты выполнено успешно',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,

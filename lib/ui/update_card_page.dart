@@ -1,7 +1,10 @@
+import 'package:cashback_info/bloc/update_card_bloc/update_card_bloc_bloc.dart';
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
+import 'package:cashback_info/ui/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 List<Cashback> categoriesOfCashback = [
   Cashback(id: 0, name: 'Авто'),
@@ -44,7 +47,6 @@ class UpdateCardPage extends StatefulWidget {
 class _UpdateCardPageState extends State<UpdateCardPage> {
   late String _selectedCountOfCategory;
   List<Cashback> _selectedCategories = [];
-  
 
   TextEditingController _cardNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -101,8 +103,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                       }
                       return null;
                     }),
-               
-                 Row(
+                Row(
                   children: [
                     const Expanded(
                       flex: 3,
@@ -128,7 +129,10 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                               if (index < _selectedCategories.length) {
                                 return _selectedCategories[index];
                               } else {
-                                return categoriesOfCashback[0];
+                                return widget.userCardToUpdate.bankType ==
+                                        BankType.tinkoff
+                                    ? Cashback.tinkoffCategoriesOfCashback[0]
+                                    : Cashback.alphaCategoriesOfCashback[0];
                               }
                             });
                           });
@@ -165,18 +169,34 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                           }
                         },
                         value: _selectedCategories[index].name,
-                        items: categoriesOfCashback
-                            .map<DropdownMenuItem<String>>(
-                              (e) => DropdownMenuItem(
-                                child: Text(e.name),
-                                value: e.name,
-                              ),
-                            )
-                            .toList(),
+                        items:
+                            widget.userCardToUpdate.bankType == BankType.tinkoff
+                                ? Cashback.tinkoffCategoriesOfCashback
+                                    .map<DropdownMenuItem<String>>(
+                                      (e) => DropdownMenuItem(
+                                        child: Text(e.name),
+                                        value: e.name,
+                                      ),
+                                    )
+                                    .toList()
+                                : Cashback.alphaCategoriesOfCashback
+                                    .map<DropdownMenuItem<String>>(
+                                      (e) => DropdownMenuItem(
+                                        child: Text(e.name),
+                                        value: e.name,
+                                      ),
+                                    )
+                                    .toList(),
                         onChanged: (value) {
                           setState(() {
-                            _selectedCategories[index] = categoriesOfCashback
-                                .firstWhere((element) => element.name == value);
+                            _selectedCategories[index] = widget
+                                        .userCardToUpdate.bankType ==
+                                    BankType.tinkoff
+                                ? Cashback.tinkoffCategoriesOfCashback
+                                    .firstWhere(
+                                        (element) => element.name == value)
+                                : Cashback.alphaCategoriesOfCashback.firstWhere(
+                                    (element) => element.name == value);
                           });
                         },
                       ),
@@ -188,17 +208,9 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                     );
                   },
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _userCard = BankCard(
-                        id: 0,
-                        bankType: widget.userCardToUpdate.bankType,
-                        cardName: _cardNameController.text,
-                        lastUpdate: DateTime.now(),
-                        cashbackCategories: _selectedCategories,
-                      );
-                      print(_userCard.toString());
+                BlocListener<UpdateCardBloc, UpdateCardBlocState>(
+                  listener: (context, state) {
+                    if (state is UpdateCardBlocSuccess) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           duration: Duration(seconds: 1),
@@ -213,11 +225,45 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                           ),
                         ),
                       );
-                      Navigator.of(context).pop();
-                      _formKey.currentState!.save();
+                      Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+                    } 
+                    if (state is UpdateCardBlocFailure)
+                    {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          duration: Duration(seconds: 1),
+                          backgroundColor: Colors.red,
+                          content: Text(
+                            'При обновлении карты произошла ошибка',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18.0,
+                            ),
+                          ),
+                        ),
+                      );
                     }
                   },
-                  child: Text('Обновить'),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        _userCard = BankCard(
+                          id: widget.userCardToUpdate.id,
+                          bankType: widget.userCardToUpdate.bankType,
+                          cardName: _cardNameController.text,
+                          lastUpdate: DateTime.now(),
+                          cashbackCategories: _selectedCategories,
+                        );
+                        context
+                            .read<UpdateCardBloc>()
+                            .add(UpdateCardOnDb(userCard: _userCard));
+
+                        _formKey.currentState!.save();
+                      }
+                    },
+                    child: Text('Обновить'),
+                  ),
                 ),
               ],
             ),
