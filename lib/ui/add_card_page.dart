@@ -223,7 +223,7 @@ class _AddCardPageState extends State<AddCardPage> {
                           ),
                         ),
                       );
-                      Navigator.of(context).pushReplacementNamed(HomePage.routeName);
+                      Navigator.of(context).pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
                     }
                     if (state is AddCardBlocFailure) 
                     {

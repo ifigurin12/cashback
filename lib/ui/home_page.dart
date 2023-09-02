@@ -78,7 +78,7 @@ class HomePage extends StatelessWidget with RouteAware {
 }
 
 Widget showCardInformation(
-    BuildContext context, BankCard card, double width, double height) {
+    BuildContext mainContext, BankCard card, double width, double height) {
   return Container(
     height: card.cashbackCategories.length < 3 ? height * 0.2 : height * 0.25,
     padding: EdgeInsets.all(width * 0.03),
@@ -127,7 +127,7 @@ Widget showCardInformation(
           children: [
             IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(
+                Navigator.of(mainContext).pushNamed(
                   UpdateCardPage.routeName,
                   arguments: card,
                 );
@@ -155,9 +155,8 @@ Widget showCardInformation(
                     ),
                   );
                 }
-                if (state is DeleteCardBlocSuccess) 
-                {
-                   ScaffoldMessenger.of(context).showSnackBar(
+                if (state is DeleteCardBlocSuccess) {
+                  ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       duration: Duration(seconds: 1),
                       backgroundColor: Colors.green,
@@ -176,9 +175,28 @@ Widget showCardInformation(
               },
               child: IconButton(
                 onPressed: () {
-                  context
-                      .read<DeleteCardBloc>()
-                      .add(DeleteCardFromDb(userCard: card));
+                  showDialog<String>(
+                    context: mainContext,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text('Удалить'),
+                      content: Text('Удалить карту с именем ${card.cardName}'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Отмена'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            mainContext.read<DeleteCardBloc>().add(
+                                  DeleteCardFromDb(userCard: card),
+                                );
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Удалить'),
+                        ),
+                      ],
+                    ),
+                  );
                 },
                 icon: const Icon(
                   Icons.delete,
