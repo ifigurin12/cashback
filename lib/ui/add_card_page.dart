@@ -63,17 +63,26 @@ class _AddCardPageState extends State<AddCardPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextFormField(
-                    controller: _cardNameController,
-                    decoration: const InputDecoration(
-                      hintText: 'Введите название карты',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Пожалуйста введие название карты';
-                      }
-                      return null;
-                    }),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: TextFormField(
+                      controller: _cardNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Имя карты',
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        prefixIcon: Icon(Icons.payment),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                        ),
+                        hintText: 'Введите название карты',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Пожалуйста введие название карты';
+                        }
+                        return null;
+                      }),
+                ),
                 const Padding(
                   padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
                   child: Text(
@@ -82,7 +91,7 @@ class _AddCardPageState extends State<AddCardPage> {
                   ),
                 ),
                 Wrap(
-                  spacing: 5,
+                  spacing: 10,
                   children: List<Widget>.generate(
                     listOfBank.length,
                     (int index) {
@@ -108,37 +117,6 @@ class _AddCardPageState extends State<AddCardPage> {
                     },
                   ).toList(),
                 ),
-                // [
-                //   ActionChip(
-                //     label: Text(listOfBank[0]),
-                //     onPressed: () {
-                //       setState(() {
-                //         _selectedCardBank = listOfBank[0];
-                //         _selectedCategories = List.filled(
-                //           int.parse(_selectedCountOfCategory),
-                //           _selectedCardBank == listOfBank[0]
-                //               ? Cashback.tinkoffCategoriesOfCashback[0]
-                //               : Cashback.alphaCategoriesOfCashback[0],
-                //         );
-                //         print(_selectedCardBank);
-                //       });
-                //     },
-                //   ),
-                //   ActionChip(
-                //       label: Text(listOfBank[1]),
-                //       onPressed: () {
-                //         setState(() {
-                //           _selectedCardBank = listOfBank[1];
-                //           _selectedCategories = List.filled(
-                //             int.parse(_selectedCountOfCategory),
-                //             _selectedCardBank == listOfBank[0]
-                //                 ? Cashback.tinkoffCategoriesOfCashback[0]
-                //                 : Cashback.alphaCategoriesOfCashback[0],
-                //           );
-                //           print(_selectedCardBank);
-                //         });
-                //       }),
-                // ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -147,7 +125,7 @@ class _AddCardPageState extends State<AddCardPage> {
                       style: TextStyle(fontSize: 15),
                     ),
                     DropdownButton<String>(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
                       value: _selectedCountOfCategory,
                       items: countOfCategories
                           .map<DropdownMenuItem<String>>(
@@ -158,15 +136,17 @@ class _AddCardPageState extends State<AddCardPage> {
                           )
                           .toList(),
                       onChanged: (value) {
-                        setState(() {
-                          _selectedCountOfCategory = value!;
-                          _selectedCategories = List.filled(
-                            int.parse(_selectedCountOfCategory),
-                            _selectedCardBank == listOfBank[0]
-                                ? Cashback.tinkoffCategoriesOfCashback[0]
-                                : Cashback.alphaCategoriesOfCashback[0],
-                          );
-                        });
+                        setState(
+                          () {
+                            _selectedCountOfCategory = value!;
+                            _selectedCategories = List.filled(
+                              int.parse(_selectedCountOfCategory),
+                              _selectedCardBank == listOfBank[0]
+                                  ? Cashback.tinkoffCategoriesOfCashback[0]
+                                  : Cashback.alphaCategoriesOfCashback[0],
+                            );
+                          },
+                        );
                       },
                     ),
                   ],
@@ -177,42 +157,40 @@ class _AddCardPageState extends State<AddCardPage> {
                         List.generate(
                       int.parse(_selectedCountOfCategory),
                       (index) => DropdownButtonFormField<String>(
+                        padding: EdgeInsets.only(bottom: 8),
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(25),
+                            ),
+                          ),
+                        ),
                         validator: (value) {
                           bool isUnrepeat = true;
-                          for (int i = 0;
-                              i < _selectedCategories.length - 1;
-                              i++)
-                            // ignore: curly_braces_in_flow_control_structures
-                            for (int j = i + 1;
-                                j < _selectedCategories.length;
-                                j++) {
-                              if (_selectedCategories[i] ==
-                                  _selectedCategories[j]) {
-                                isUnrepeat = false;
-                              }
-                            }
-
-                          if (!isUnrepeat) {
-                            return 'Выберите разные категории из предложенных';
-                          } else {
-                            return null;
-                          }
+                          Set<Cashback> unrepeatCheck =
+                              Set.from(_selectedCategories);
+                          unrepeatCheck.length == _selectedCategories.length
+                              ? isUnrepeat = true
+                              : isUnrepeat = false;
+                          return isUnrepeat
+                              ? null
+                              : 'Выберите разные категории из предложенных';
                         },
                         value: _selectedCategories[index].name,
                         items: _selectedCardBank == listOfBank[0]
                             ? Cashback.tinkoffCategoriesOfCashback
                                 .map<DropdownMenuItem<String>>(
                                   (e) => DropdownMenuItem(
-                                    child: Text(e.name),
                                     value: e.name,
+                                    child: Text(e.name),
                                   ),
                                 )
                                 .toList()
                             : Cashback.alphaCategoriesOfCashback
                                 .map<DropdownMenuItem<String>>(
                                   (e) => DropdownMenuItem(
-                                    child: Text(e.name),
                                     value: e.name,
+                                    child: Text(e.name),
                                   ),
                                 )
                                 .toList(),
