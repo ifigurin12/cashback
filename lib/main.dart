@@ -10,11 +10,9 @@ import 'package:cashback_info/ui/update_card_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'data_layer/models/cashback.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-
+void main() {
   runApp(MyApp());
 }
 
@@ -26,59 +24,59 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.dark,
-        useMaterial3: true,
-      ),
-      initialRoute: HomePage.routeName,
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case HomePage.routeName:
-            return PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  MultiBlocProvider(
-                providers: [
-                  BlocProvider<ReadCardsBloc>(
-                    create: (context) {
-                      ReadCardsBloc readCardsBloc = ReadCardsBloc();
-                      readCardsBloc.add(ReadCardList());
-                      return readCardsBloc;
-                    },
-                  ),
-                  BlocProvider<DeleteCardBloc>(
-                    create: (context) {
-                      DeleteCardBloc deleteCardsBloc = DeleteCardBloc();
-                      return deleteCardsBloc;
-                    },
-                  ),
-                ],
-                child: HomePage(),
-              ),
-            );
-          case UpdateCardPage.routeName:
-            final card = settings.arguments as BankCard;
-            return PageRouteBuilder(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorSchemeSeed: Colors.blue,
+          brightness: Brightness.dark,
+          useMaterial3: true,
+        ),
+        initialRoute: HomePage.routeName,
+        onGenerateRoute: (settings) {
+          switch (settings.name) {
+            case HomePage.routeName:
+              return PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    BlocProvider(
-                      create: (context) => UpdateCardBloc(),
-                      child: UpdateCardPage(userCardToUpdate: card),
-                    ));
-          case AddCardPage.routeName:
-            return PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  BlocProvider<AddCardBloc>(
-                      create: (context) => AddCardBloc(), child: AddCardPage()),
-            );
-          case NotFoundPage.routeName:
-            return PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  NotFoundPage(),
-            );
-        }
-      },
-    );
+                    MultiBlocProvider(
+                  providers: [
+                    BlocProvider<ReadCardsBloc>(
+                      create: (context) {
+                        ReadCardsBloc readCardsBloc = ReadCardsBloc();
+                        readCardsBloc.add(ReadCardList());
+                        return readCardsBloc;
+                      },
+                    ),
+                    BlocProvider<DeleteCardBloc>(
+                      create: (context) {
+                        DeleteCardBloc deleteCardsBloc = DeleteCardBloc();
+                        return deleteCardsBloc;
+                      },
+                    ),
+                  ],
+                  child: HomePage(),
+                ),
+              );
+            case UpdateCardPage.routeName:
+              final card = settings.arguments as BankCard;
+              return PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      BlocProvider(
+                        create: (context) => UpdateCardBloc(),
+                        child: UpdateCardPage(userCardToUpdate: card),
+                      ));
+            case AddCardPage.routeName:
+              return PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    BlocProvider<AddCardBloc>(
+                        create: (context) => AddCardBloc(),
+                        child: AddCardPage()),
+              );
+            case NotFoundPage.routeName:
+              return PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    NotFoundPage(),
+              );
+          }
+        });
   }
 }
