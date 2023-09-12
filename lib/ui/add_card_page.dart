@@ -60,8 +60,8 @@ class _AddCardPageState extends State<AddCardPage> {
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextFormField(
                     controller: _cardNameController,
@@ -74,69 +74,100 @@ class _AddCardPageState extends State<AddCardPage> {
                       }
                       return null;
                     }),
-                Row(
-                  children: [
-                    const Expanded(
-                      flex: 2,
-                      child: Text('Выберите банк вашей карты:'),
-                    ),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        value: _selectedCardBank,
-                        items: listOfBank
-                            .map<DropdownMenuItem<String>>(
-                              (e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCardBank = value!;
-                            _selectedCategories = List.filled(
-                              int.parse(_selectedCountOfCategory),
-                              _selectedCardBank == listOfBank[0]
-                                  ? Cashback.tinkoffCategoriesOfCashback[0]
-                                  : Cashback.alphaCategoriesOfCashback[0],
-                            );
-                          });
-                        },
-                      ),
-                    ),
-                  ],
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+                  child: Text(
+                    'Выберите банк вашей карты:',
+                    style: TextStyle(fontSize: 15),
+                  ),
                 ),
-                Row(
-                  children: [
-                    const Expanded(
-                      flex: 3,
-                      child: Text('Выберите кол-во категорий:'),
-                    ),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                        value: _selectedCountOfCategory,
-                        items: countOfCategories
-                            .map<DropdownMenuItem<String>>(
-                              (e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCountOfCategory = value!;
-                            _selectedCategories = List.filled(
-                              int.parse(_selectedCountOfCategory),
-                              _selectedCardBank == listOfBank[0]
-                                  ? Cashback.tinkoffCategoriesOfCashback[0]
-                                  : Cashback.alphaCategoriesOfCashback[0],
-                            );
-                          });
+                Wrap(
+                  spacing: 5,
+                  children: List<Widget>.generate(
+                    listOfBank.length,
+                    (int index) {
+                      return ChoiceChip(
+                        label: Text(listOfBank[index]),
+                        selected: _selectedCardBank == listOfBank[index],
+                        onSelected: (bool selected) {
+                          setState(
+                            () {
+                              if (selected) {
+                                _selectedCardBank = listOfBank[index];
+                                _selectedCategories = List.filled(
+                                  int.parse(_selectedCountOfCategory),
+                                  _selectedCardBank == listOfBank[0]
+                                      ? Cashback.tinkoffCategoriesOfCashback[0]
+                                      : Cashback.alphaCategoriesOfCashback[0],
+                                );
+                              }
+                            },
+                          );
                         },
-                      ),
+                      );
+                    },
+                  ).toList(),
+                ),
+                // [
+                //   ActionChip(
+                //     label: Text(listOfBank[0]),
+                //     onPressed: () {
+                //       setState(() {
+                //         _selectedCardBank = listOfBank[0];
+                //         _selectedCategories = List.filled(
+                //           int.parse(_selectedCountOfCategory),
+                //           _selectedCardBank == listOfBank[0]
+                //               ? Cashback.tinkoffCategoriesOfCashback[0]
+                //               : Cashback.alphaCategoriesOfCashback[0],
+                //         );
+                //         print(_selectedCardBank);
+                //       });
+                //     },
+                //   ),
+                //   ActionChip(
+                //       label: Text(listOfBank[1]),
+                //       onPressed: () {
+                //         setState(() {
+                //           _selectedCardBank = listOfBank[1];
+                //           _selectedCategories = List.filled(
+                //             int.parse(_selectedCountOfCategory),
+                //             _selectedCardBank == listOfBank[0]
+                //                 ? Cashback.tinkoffCategoriesOfCashback[0]
+                //                 : Cashback.alphaCategoriesOfCashback[0],
+                //           );
+                //           print(_selectedCardBank);
+                //         });
+                //       }),
+                // ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Выберите кол-во категорий:',
+                      style: TextStyle(fontSize: 15),
+                    ),
+                    DropdownButton<String>(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      value: _selectedCountOfCategory,
+                      items: countOfCategories
+                          .map<DropdownMenuItem<String>>(
+                            (e) => DropdownMenuItem(
+                              value: e,
+                              child: Text(e),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCountOfCategory = value!;
+                          _selectedCategories = List.filled(
+                            int.parse(_selectedCountOfCategory),
+                            _selectedCardBank == listOfBank[0]
+                                ? Cashback.tinkoffCategoriesOfCashback[0]
+                                : Cashback.alphaCategoriesOfCashback[0],
+                          );
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -207,8 +238,7 @@ class _AddCardPageState extends State<AddCardPage> {
                 ),
                 BlocListener<AddCardBloc, AddCardBlocState>(
                   listener: (context, state) {
-                    if (state is AddCardBlocSuccess) 
-                    {
+                    if (state is AddCardBlocSuccess) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           duration: Duration(seconds: 1),
@@ -223,10 +253,10 @@ class _AddCardPageState extends State<AddCardPage> {
                           ),
                         ),
                       );
-                      Navigator.of(context).pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          HomePage.routeName, (route) => false);
                     }
-                    if (state is AddCardBlocFailure) 
-                    {
+                    if (state is AddCardBlocFailure) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           duration: Duration(seconds: 1),
@@ -243,23 +273,28 @@ class _AddCardPageState extends State<AddCardPage> {
                       );
                     }
                   },
-                  child: ElevatedButton(
-                    child: const Text('Добавить'),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _userCard = BankCard(
-                          bankType: _selectedCardBank == listOfBank[0]
-                              ? BankType.tinkoff
-                              : BankType.alpha,
-                          cardName: _cardNameController.text,
-                          lastUpdate: DateTime.now(),
-                          cashbackCategories: _selectedCategories,
-                        );
-                        BlocProvider.of<AddCardBloc>(context).add(
-                          AddCardToDb(card: _userCard),
-                        );
-                      }
-                    },
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ElevatedButton(
+                        child: const Text('Добавить'),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _userCard = BankCard(
+                              bankType: _selectedCardBank == listOfBank[0]
+                                  ? BankType.tinkoff
+                                  : BankType.alpha,
+                              cardName: _cardNameController.text,
+                              lastUpdate: DateTime.now(),
+                              cashbackCategories: _selectedCategories,
+                            );
+                            BlocProvider.of<AddCardBloc>(context).add(
+                              AddCardToDb(card: _userCard),
+                            );
+                          }
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ],
