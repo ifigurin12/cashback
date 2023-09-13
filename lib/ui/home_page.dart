@@ -33,8 +33,13 @@ class HomePage extends StatelessWidget with RouteAware {
             },
             icon: Icon(Icons.add),
           ),
+          IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: () {
+              
+            },
+          ),
         ],
-        centerTitle: true,
       ),
       body: BlocConsumer<ReadCardsBloc, ReadCardsBlocState>(
         listener: (context, state) {},
@@ -78,9 +83,11 @@ class HomePage extends StatelessWidget with RouteAware {
 }
 
 Widget showCardInformation(
-    BuildContext mainContext, BankCard card, double width, double height) {
+    BuildContext context, BankCard card, double width, double height) {
+  double containerHeight =
+      card.cashbackCategories.length < 4 ? height * 0.20 : height * 0.25;
   return Container(
-    height: card.cashbackCategories.length < 3 ? height * 0.2 : height * 0.25,
+    height: containerHeight,
     padding: EdgeInsets.all(width * 0.03),
     margin: EdgeInsets.all(width * 0.03),
     decoration: BoxDecoration(
@@ -115,7 +122,8 @@ Widget showCardInformation(
                 fontWeight: FontWeight.w400,
               ),
             ),
-            textWithCashbacksInColumn(card.cashbackCategories),
+            textWithCashbacksInColumn(
+                card.cashbackCategories, containerHeight, context),
           ],
         ),
       ),
@@ -127,7 +135,7 @@ Widget showCardInformation(
           children: [
             IconButton(
               onPressed: () {
-                Navigator.of(mainContext).pushNamed(
+                Navigator.of(context).pushNamed(
                   UpdateCardPage.routeName,
                   arguments: card,
                 );
@@ -176,7 +184,7 @@ Widget showCardInformation(
               child: IconButton(
                 onPressed: () {
                   showDialog<String>(
-                    context: mainContext,
+                    context: context,
                     builder: (BuildContext context) => AlertDialog(
                       title: const Text('Удалить'),
                       content: Text('Удалить карту с именем ${card.cardName}'),
@@ -187,7 +195,7 @@ Widget showCardInformation(
                         ),
                         TextButton(
                           onPressed: () {
-                            mainContext.read<DeleteCardBloc>().add(
+                            context.read<DeleteCardBloc>().add(
                                   DeleteCardFromDb(userCard: card),
                                 );
                             Navigator.pop(context);
@@ -212,18 +220,19 @@ Widget showCardInformation(
   );
 }
 
-Widget textWithCashbacksInColumn(List<Cashback> cashbacks) {
-  String result = '';
-  cashbacks.forEach((element) {
-    result += element.name;
-    result += '\n';
-  });
-  return Text(
-    result,
-    style: const TextStyle(
-      fontSize: 15,
-      color: Colors.white,
-      fontWeight: FontWeight.w300,
+Widget textWithCashbacksInColumn(
+    List<Cashback> cashbacks, double containerHeight, BuildContext context) {
+  List<Row> cashbackName = List.generate(
+    cashbacks.length,
+    (index) => Row(
+      children: [
+        Text(cashbacks[index].name),
+      ],
     ),
+  );
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: cashbackName,
   );
 }

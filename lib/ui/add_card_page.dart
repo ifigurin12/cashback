@@ -195,15 +195,20 @@ class _AddCardPageState extends State<AddCardPage> {
                                 )
                                 .toList(),
                         onChanged: (value) {
-                          setState(() {
-                            _selectedCategories[index] = _selectedCardBank ==
-                                    listOfBank[0]
-                                ? Cashback.tinkoffCategoriesOfCashback
-                                    .firstWhere(
-                                        (element) => element.name == value)
-                                : Cashback.alphaCategoriesOfCashback.firstWhere(
-                                    (element) => element.name == value);
-                          });
+                          setState(
+                            () {
+                              _selectedCategories[index] =
+                                  _selectedCardBank == listOfBank[0]
+                                      ? Cashback.tinkoffCategoriesOfCashback
+                                          .firstWhere(
+                                          (element) => element.name == value,
+                                        )
+                                      : Cashback.alphaCategoriesOfCashback
+                                          .firstWhere(
+                                          (element) => element.name == value,
+                                        );
+                            },
+                          );
                         },
                       ),
                     );

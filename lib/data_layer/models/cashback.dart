@@ -1,12 +1,14 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
 import 'card.dart';
 
-class Cashback extends Equatable{
+class Cashback extends Equatable {
   int id;
   String name;
+  Icon? icon;
 
-  Cashback({required this.id, required this.name});
+  Cashback({required this.id, required this.name, this.icon});
 
   factory Cashback.fromJson(Map<String, dynamic> json) {
     final id = json['category_id'];
@@ -21,19 +23,58 @@ class Cashback extends Equatable{
     return jsonMap;
   }
 
-
   static List<Cashback> alphaCategoriesOfCashback = [
-    Cashback(id: 0, name: 'Авто'),
-    Cashback(id: 1, name: 'АЗС'),
-    Cashback(id: 2, name: 'Аренда авто'),
-    Cashback(id: 3, name: 'Дом и ремонт'),
-    Cashback(id: 4, name: 'Животные'),
-    Cashback(id: 5, name: 'Здоровье'),
-    Cashback(id: 6, name: 'Кафе и рестораны'),
-    Cashback(id: 7, name: 'Книги'),
-    Cashback(id: 8, name: 'Коммунальные услуги'),
-    Cashback(id: 9, name: 'Красота'),
-    Cashback(id: 10, name: 'Образование'),
+    Cashback(
+      id: 0,
+      name: 'Авто',
+      icon: Icon(Icons.directions_car),
+    ),
+    Cashback(
+      id: 1,
+      name: 'АЗС',
+      icon: Icon(Icons.local_gas_station),
+    ),
+    Cashback(
+      id: 2,
+      name: 'Аренда авто',
+      icon: Icon(Icons.car_rental),
+    ),
+    Cashback(
+      id: 3,
+      name: 'Дом и ремонт',
+      icon: Icon(Icons.plumbing),
+    ),
+    Cashback(
+      id: 4,
+      name: 'Животные',
+      icon: Icon(Icons.pets),
+    ),
+    Cashback(
+      id: 5,
+      name: 'Здоровье',
+      icon: Icon(Icons.medical_services),
+    ),
+    Cashback(id: 6, name: 'Кафе и рестораны', icon: Icon(Icons.restaurant)),
+    Cashback(
+      id: 7,
+      name: 'Книги',
+      icon: Icon(Icons.book_outlined),
+    ),
+    Cashback(
+      id: 8,
+      name: 'Коммунальные услуги',
+      icon: Icon(Icons.home),
+    ),
+    Cashback(
+      id: 9,
+      name: 'Красота',
+      icon: Icon(Icons.home),
+    ),
+    Cashback(
+      id: 10,
+      name: 'Образование',
+      icon: Icon(Icons.school),
+    ),
     Cashback(id: 11, name: 'Одежда и обувь'),
     Cashback(id: 12, name: 'Путешествия'),
     Cashback(id: 13, name: 'Развлечения'),
@@ -84,7 +125,7 @@ class Cashback extends Equatable{
     Cashback(id: 31, name: 'Цветы'),
     Cashback(id: 32, name: 'Электроника и техника'),
   ];
-  
+
   @override
   // TODO: implement props
   List<Object?> get props => [id, name];
