@@ -36,7 +36,13 @@ class HomePage extends StatelessWidget with RouteAware {
           IconButton(
             icon: Icon(Icons.filter_list),
             onPressed: () {
-              
+              showModalBottomSheet<void>(
+                isScrollControlled: true,
+                context: context,
+                builder: (context) {
+                  return CardCategoryFilter();
+                },
+              );
             },
           ),
         ],
@@ -77,6 +83,78 @@ class HomePage extends StatelessWidget with RouteAware {
             );
           }
         },
+      ),
+    );
+  }
+}
+
+class CardCategoryFilter extends StatefulWidget {
+  State<CardCategoryFilter> createState() => _CardCategoryFilterState();
+}
+
+class _CardCategoryFilterState extends State<CardCategoryFilter> {
+  Set<Cashback> cashbackTinkoff = <Cashback>{};
+  Set<Cashback> cashbackAlpha = <Cashback>{};
+
+  @override
+  Widget build(BuildContext context) {
+    final _size = MediaQuery.of(context).size;
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        height: _size.height * 0.35,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            const Text('Категории тинькофф: '),
+            Container(
+              height: _size.height * 0.1,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: Cashback.tinkoffCategoriesOfCashback.length,
+                itemBuilder: (context, index) => FilterChip(
+                  selected: cashbackTinkoff.contains(Cashback.tinkoffCategoriesOfCashback[index]),
+                  onSelected: (bool selected) {
+                    setState(() {
+                      selected ? cashbackTinkoff.add(Cashback.tinkoffCategoriesOfCashback[index]) : 
+                      cashbackTinkoff.remove(Cashback.tinkoffCategoriesOfCashback[index]);
+                      print(cashbackTinkoff);
+                    });
+                  },
+                  label: Text(Cashback.tinkoffCategoriesOfCashback[index].name),
+                ),
+                separatorBuilder: (context, index) => SizedBox(width: 5),
+              ),
+            ),
+            const Text('Категории Альфа: '),
+            Container(
+              height: _size.height * 0.1,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: Cashback.alphaCategoriesOfCashback.length,
+                itemBuilder: (context, index) => FilterChip(
+                  selected: cashbackAlpha.contains(Cashback.alphaCategoriesOfCashback[index]),
+                  onSelected: (bool selected) {
+                    setState(() {
+                      selected ? cashbackAlpha.add(Cashback.alphaCategoriesOfCashback[index]) : 
+                      cashbackAlpha.remove(Cashback.alphaCategoriesOfCashback[index]);
+                      print(cashbackAlpha);
+                    });
+                  },
+                  label: Text(Cashback.alphaCategoriesOfCashback[index].name),
+                ),
+                separatorBuilder: (context, index) => SizedBox(width: 5),
+              ),
+            ),
+            Center(
+              child: OutlinedButton(
+                child: Text('Выбрать'),
+                onPressed: () {},
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

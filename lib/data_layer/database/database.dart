@@ -146,6 +146,36 @@ class DBProvider {
     return cardList;
   }
 
+  Future<List<BankCard>> getCardsWithSelectedCategory(List<Cashback> tinkoff, List<Cashback> alpha) async
+  {
+    Database db = await database;
+    List<BankCard> cardList = [];
+    List<Map<String, dynamic>> idCardsJson = [];
+    List<int> cardId = []; 
+
+    for (Cashback c in tinkoff) 
+    {
+      idCardsJson = await db.query(
+            _cardTinkoffCashbackTable,
+            columns: [_idCard],
+            where: '$_idCategory = ?',
+            whereArgs: [c.id],
+          );
+    }
+    cardId.addAll(idCardsJson.map((e) => e[_idCard]));
+    for (Cashback c in tinkoff) 
+    {
+      idCardsJson = await db.query(
+            _cardTinkoffCashbackTable,
+            columns: [_idCard],
+            where: '$_idCategory = ?',
+            whereArgs: [c.id],
+          );
+    }
+    cardId.addAll(idCardsJson.map((e) => e[_idCard]));
+    return cardList;
+  }
+
   //  INSERT
   Future<int> insertCard(BankCard card) async {
     Database db = await database;
