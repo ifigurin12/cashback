@@ -8,9 +8,9 @@ sealed class DeleteCardBlocEvent extends Equatable {
 }
 
 class DeleteCardFromDb extends DeleteCardBlocEvent{
-  BankCard userCard; 
+  final BankCard userCard; 
 
-  DeleteCardFromDb({required this.userCard});
+  const DeleteCardFromDb({required this.userCard});
 
   @override
   List<Object> get props => [userCard];

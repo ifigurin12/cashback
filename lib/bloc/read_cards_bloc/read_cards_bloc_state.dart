@@ -12,9 +12,9 @@ final class ReadCardsBlocInitial extends ReadCardsBlocState {}
 final class ReadCardsBlocLoading extends ReadCardsBlocState {}
 
 final class ReadCardsBlocSuccess extends ReadCardsBlocState {
-  List<BankCard> listCard;
+  final List<BankCard> listCard;
 
-  ReadCardsBlocSuccess({required this.listCard});
+  const ReadCardsBlocSuccess({required this.listCard});
   @override
   List<Object> get props => [listCard];
 }

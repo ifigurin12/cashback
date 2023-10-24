@@ -8,9 +8,9 @@ sealed class AddCardBlocEvent extends Equatable {
 }
 
 class AddCardToDb extends AddCardBlocEvent {
-  BankCard card;
+  final BankCard card;
 
-  AddCardToDb({required this.card});
+  const AddCardToDb({required this.card});
 
   @override
   List<Object> get props => [card];

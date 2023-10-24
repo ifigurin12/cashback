@@ -8,7 +8,7 @@ sealed class UpdateCardBlocEvent extends Equatable {
 }
 
 class UpdateCardOnDb extends UpdateCardBlocEvent{
-  BankCard userCard; 
+  final BankCard userCard; 
 
-  UpdateCardOnDb({required this.userCard});
+  const UpdateCardOnDb({required this.userCard});
 }

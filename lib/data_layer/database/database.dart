@@ -38,7 +38,7 @@ class DBProvider {
 
   Future<Database> _initDB() async {
     Directory dir = await getApplicationDocumentsDirectory();
-    String path = dir.path + 'cards.db';
+    String path = '${dir.path}cards.db';
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 

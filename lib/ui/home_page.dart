@@ -13,11 +13,11 @@ class HomePage extends StatelessWidget with RouteAware {
   late List<BankCard> _userCardList;
   static const String routeName = '/homePage';
 
+  HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<ReadCardsBloc>();
-    List<BankCard> _usersCard = [];
-    final _size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -31,10 +31,10 @@ class HomePage extends StatelessWidget with RouteAware {
                 AddCardPage.routeName,
               );
             },
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
           ),
           IconButton(
-            icon: Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list),
             onPressed: () {
               showModalBottomSheet<void>(
                 isScrollControlled: true,
@@ -65,8 +65,8 @@ class HomePage extends StatelessWidget with RouteAware {
               itemBuilder: (context, index) => showCardInformation(
                 context,
                 _userCardList[index],
-                _size.width,
-                _size.height,
+                size.width,
+                size.height,
               ),
             );
           } else if (state is ReadCardsBlocEmpty) {
@@ -89,6 +89,9 @@ class HomePage extends StatelessWidget with RouteAware {
 }
 
 class CardCategoryFilter extends StatefulWidget {
+  const CardCategoryFilter({super.key});
+
+  @override
   State<CardCategoryFilter> createState() => _CardCategoryFilterState();
 }
 
@@ -98,28 +101,31 @@ class _CardCategoryFilterState extends State<CardCategoryFilter> {
 
   @override
   Widget build(BuildContext context) {
-    final _size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context).size;
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Container(
-        height: _size.height * 0.35,
+      child: SizedBox(
+        height: size.height * 0.35,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const Text('Категории тинькофф: '),
-            Container(
-              height: _size.height * 0.1,
+            SizedBox(
+              height: size.height * 0.1,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: Cashback.tinkoffCategoriesOfCashback.length,
                 itemBuilder: (context, index) => FilterChip(
-                  selected: cashbackTinkoff.contains(Cashback.tinkoffCategoriesOfCashback[index]),
+                  selected: cashbackTinkoff
+                      .contains(Cashback.tinkoffCategoriesOfCashback[index]),
                   onSelected: (bool selected) {
                     setState(() {
-                      selected ? cashbackTinkoff.add(Cashback.tinkoffCategoriesOfCashback[index]) : 
-                      cashbackTinkoff.remove(Cashback.tinkoffCategoriesOfCashback[index]);
-                      print(cashbackTinkoff);
+                      selected
+                          ? cashbackTinkoff
+                              .add(Cashback.tinkoffCategoriesOfCashback[index])
+                          : cashbackTinkoff.remove(
+                              Cashback.tinkoffCategoriesOfCashback[index]);
                     });
                   },
                   label: Text(Cashback.tinkoffCategoriesOfCashback[index].name),
@@ -128,18 +134,21 @@ class _CardCategoryFilterState extends State<CardCategoryFilter> {
               ),
             ),
             const Text('Категории Альфа: '),
-            Container(
-              height: _size.height * 0.1,
+            SizedBox(
+              height: size.height * 0.1,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: Cashback.alphaCategoriesOfCashback.length,
                 itemBuilder: (context, index) => FilterChip(
-                  selected: cashbackAlpha.contains(Cashback.alphaCategoriesOfCashback[index]),
+                  selected: cashbackAlpha
+                      .contains(Cashback.alphaCategoriesOfCashback[index]),
                   onSelected: (bool selected) {
                     setState(() {
-                      selected ? cashbackAlpha.add(Cashback.alphaCategoriesOfCashback[index]) : 
-                      cashbackAlpha.remove(Cashback.alphaCategoriesOfCashback[index]);
-                      print(cashbackAlpha);
+                      selected
+                          ? cashbackAlpha
+                              .add(Cashback.alphaCategoriesOfCashback[index])
+                          : cashbackAlpha.remove(
+                              Cashback.alphaCategoriesOfCashback[index]);
                     });
                   },
                   label: Text(Cashback.alphaCategoriesOfCashback[index].name),
@@ -150,7 +159,15 @@ class _CardCategoryFilterState extends State<CardCategoryFilter> {
             Center(
               child: OutlinedButton(
                 child: Text('Выбрать'),
-                onPressed: () {},
+                onPressed: () {
+                  // context.read<ReadCardsBloc>().add(
+                  //       ReadCardListWithFilter(
+                  //         tinkoffCashback: cashbackTinkoff.toList(),
+                  //         alphaCashback: cashbackAlpha.toList(),
+                  //       ),
+                  //     );
+                  //     Navigator.of(context).pop();
+                },
               ),
             ),
           ],

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:equatable/equatable.dart';
 
 import 'package:cashback_info/data_layer/models/cashback.dart';
@@ -6,13 +5,13 @@ import 'package:cashback_info/data_layer/models/cashback.dart';
 enum BankType { tinkoff, alpha }
 
 class BankCard extends Equatable {
-  int? id;
-  String cardName;
-  BankType bankType;
-  List<Cashback> cashbackCategories;
-  DateTime lastUpdate;
+  final int? id;
+  final String cardName;
+  final BankType bankType;
+  final List<Cashback> cashbackCategories;
+  final DateTime lastUpdate;
 
-  BankCard({this.id,
+  const BankCard({this.id,
     required this.cardName,
     required this.bankType,
     required this.cashbackCategories,
@@ -20,7 +19,7 @@ class BankCard extends Equatable {
   });
 
   Map<String, dynamic> toJson() {
-    final jsonMap = Map<String, dynamic>();
+    final jsonMap = <String, dynamic>{};
     jsonMap['card_name'] = cardName;
     jsonMap['bank_type'] = bankType == BankType.tinkoff ? 0 : 1;
     jsonMap['card_last_update'] = lastUpdate.toString();
@@ -28,7 +27,7 @@ class BankCard extends Equatable {
   }
 
   Map<String, dynamic> toJsonWithoutBankType() {
-    final jsonMap = Map<String, dynamic>();
+    final jsonMap = <String, dynamic>{};
     jsonMap['card_name'] = cardName;
     jsonMap['card_last_update'] = DateTime.now().toString();
     return jsonMap;
@@ -42,9 +41,9 @@ class BankCard extends Equatable {
         jsonCard['bank_type'] == 0 ? BankType.tinkoff : BankType.alpha;
     final lastUpdate = DateTime.parse(jsonCard['card_last_update']);
     List<Cashback> cashbackCategories = [];
-    jsonCashbackList.forEach(
-      (element) => cashbackCategories.add(Cashback.fromJson(element)),
-    );
+    for (var element in jsonCashbackList) {
+      cashbackCategories.add(Cashback.fromJson(element));
+    }
     return BankCard(
       cardName: cardName,
       bankType: bankType,
@@ -57,7 +56,7 @@ class BankCard extends Equatable {
   String toString() {
     String cashback = '';
     for (var item in cashbackCategories) {
-      cashback += item.name + ' ';
+      cashback += '${item.name} ';
     }
     return 'Name: $cardName '
         'cashbacks: $cashback'

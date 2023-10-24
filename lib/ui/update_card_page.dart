@@ -3,7 +3,6 @@ import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
 import 'package:cashback_info/ui/home_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 List<Cashback> categoriesOfCashback = [
@@ -37,10 +36,11 @@ List<String> countOfCategories = ['1', '2', '3', '4', '5', '6'];
 
 class UpdateCardPage extends StatefulWidget {
   static const String routeName = '/updateCardPage';
-  BankCard userCardToUpdate;
+  final BankCard userCardToUpdate;
 
-  UpdateCardPage({required this.userCardToUpdate});
+  const UpdateCardPage({super.key, required this.userCardToUpdate});
 
+  @override
   State<UpdateCardPage> createState() => _UpdateCardPageState();
 }
 
@@ -48,7 +48,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
   late String _selectedCountOfCategory;
   List<Cashback> _selectedCategories = [];
 
-  TextEditingController _cardNameController = TextEditingController();
+  final TextEditingController _cardNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   late BankCard _userCard;
@@ -73,8 +73,8 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -151,8 +151,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                           bool isUnrepeat = true;
                           for (int i = 0;
                               i < _selectedCategories.length - 1;
-                              i++)
-                            // ignore: curly_braces_in_flow_control_structures
+                              i++) {
                             for (int j = i + 1;
                                 j < _selectedCategories.length;
                                 j++) {
@@ -161,6 +160,7 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                                 isUnrepeat = false;
                               }
                             }
+                          }
 
                           if (!isUnrepeat) {
                             return 'Выберите разные категории из предложенных';
@@ -174,16 +174,16 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                                 ? Cashback.tinkoffCategoriesOfCashback
                                     .map<DropdownMenuItem<String>>(
                                       (e) => DropdownMenuItem(
-                                        child: Text(e.name),
                                         value: e.name,
+                                        child: Text(e.name),
                                       ),
                                     )
                                     .toList()
                                 : Cashback.alphaCategoriesOfCashback
                                     .map<DropdownMenuItem<String>>(
                                       (e) => DropdownMenuItem(
-                                        child: Text(e.name),
                                         value: e.name,
+                                        child: Text(e.name),
                                       ),
                                     )
                                     .toList(),
@@ -225,10 +225,10 @@ class _UpdateCardPageState extends State<UpdateCardPage> {
                           ),
                         ),
                       );
-                      Navigator.of(context).pushNamedAndRemoveUntil(HomePage.routeName, (route) => false);
-                    } 
-                    if (state is UpdateCardBlocFailure)
-                    {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          HomePage.routeName, (route) => false);
+                    }
+                    if (state is UpdateCardBlocFailure) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           duration: Duration(seconds: 1),

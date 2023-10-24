@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:cashback_info/data_layer/database/database.dart';
 import 'package:cashback_info/data_layer/models/card.dart';

@@ -10,7 +10,6 @@ import 'package:cashback_info/ui/update_card_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'data_layer/models/cashback.dart';
 
 void main() {
   runApp(MyApp());
@@ -77,6 +76,7 @@ class MyApp extends StatelessWidget {
                     NotFoundPage(),
               );
           }
+          return null;
         });
   }
 }

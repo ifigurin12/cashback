@@ -4,7 +4,6 @@ import 'package:cashback_info/data_layer/models/cashback.dart';
 import 'package:cashback_info/ui/home_page.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 List<String> listOfBank = ['Tinkoff Bank', 'Alpha Bank'];
@@ -13,6 +12,9 @@ List<String> countOfCategories = ['1', '2', '3', '4', '5', '6'];
 class AddCardPage extends StatefulWidget {
   static const String routeName = '/addCardPage';
 
+  const AddCardPage({super.key});
+
+  @override
   State<AddCardPage> createState() => _AddCardPageState();
 }
 
@@ -22,7 +24,7 @@ class _AddCardPageState extends State<AddCardPage> {
   List<Cashback> _selectedCategories = [];
   String _selectedCardBank = listOfBank[0];
 
-  TextEditingController _cardNameController = TextEditingController();
+  final TextEditingController _cardNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   late BankCard _userCard;
@@ -44,8 +46,8 @@ class _AddCardPageState extends State<AddCardPage> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
