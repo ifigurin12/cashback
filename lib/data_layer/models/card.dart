@@ -11,7 +11,8 @@ class BankCard extends Equatable {
   final List<Cashback> cashbackCategories;
   final DateTime lastUpdate;
 
-  const BankCard({this.id,
+  const BankCard({
+    this.id,
     required this.cardName,
     required this.bankType,
     required this.cashbackCategories,
@@ -66,4 +67,6 @@ class BankCard extends Equatable {
   @override
   List<Object> get props =>
       [id!, cardName, bankType, cashbackCategories, lastUpdate];
+
+  void then(Function(dynamic value) param0) {}
 }

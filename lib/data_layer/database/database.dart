@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'package:cashback_info/data_layer/models/card.dart';
 import 'package:cashback_info/data_layer/models/cashback.dart';
-
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DBProvider {
   DBProvider._();
@@ -32,11 +32,11 @@ class DBProvider {
   final String _idCategory = 'category_id';
 
   Future<Database> get database async {
-    _database = await _initDB();
+    _database = await _initAppDB();
     return _database;
   }
 
-  Future<Database> _initDB() async {
+  Future<Database> _initAppDB() async {
     Directory dir = await getApplicationDocumentsDirectory();
     String path = '${dir.path}cards.db';
     return await openDatabase(path, version: 1, onCreate: _createDB);
@@ -146,31 +146,29 @@ class DBProvider {
     return cardList;
   }
 
-  Future<List<BankCard>> getCardsWithSelectedCategory(List<Cashback> tinkoff, List<Cashback> alpha) async
-  {
+  Future<List<BankCard>> getCardsWithSelectedCategory(
+      List<Cashback> tinkoff, List<Cashback> alpha) async {
     Database db = await database;
     List<BankCard> cardList = [];
     List<Map<String, dynamic>> idCardsJson = [];
-    List<int> cardId = []; 
+    List<int> cardId = [];
 
-    for (Cashback c in tinkoff) 
-    {
+    for (Cashback c in tinkoff) {
       idCardsJson = await db.query(
-            _cardTinkoffCashbackTable,
-            columns: [_idCard],
-            where: '$_idCategory = ?',
-            whereArgs: [c.id],
-          );
+        _cardTinkoffCashbackTable,
+        columns: [_idCard],
+        where: '$_idCategory = ?',
+        whereArgs: [c.id],
+      );
     }
     cardId.addAll(idCardsJson.map((e) => e[_idCard]));
-    for (Cashback c in tinkoff) 
-    {
+    for (Cashback c in tinkoff) {
       idCardsJson = await db.query(
-            _cardTinkoffCashbackTable,
-            columns: [_idCard],
-            where: '$_idCategory = ?',
-            whereArgs: [c.id],
-          );
+        _cardTinkoffCashbackTable,
+        columns: [_idCard],
+        where: '$_idCategory = ?',
+        whereArgs: [c.id],
+      );
     }
     cardId.addAll(idCardsJson.map((e) => e[_idCard]));
     return cardList;
