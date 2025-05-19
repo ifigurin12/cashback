@@ -1,0 +1,31 @@
+targets:
+  $default:
+    sources:
+      - lib/**
+      - swaggers/**
+      - swaggers2/**
+      - api/**
+      - swagger_examples/**
+      - $package$
+    builders:
+      chopper_generator:
+        options:
+          header: "//Generated code"
+      swagger_dart_code_generator:
+        options:
+          input_folder: "lib/internal/api/"
+          output_folder: "lib/internal/api/"
+          input_urls:
+            - url: "http://localhost:8080/swagger/doc.json"
+              file_name: "api.json"
+          with_base_url: true
+          with_converter: true
+          use_path_for_request_names: true
+          use_default_null_for_lists: false
+          override_equals_and_hashcode: true
+          build_only_models: false
+          separate_models: false
+          enums_case_sensitive: false
+          ignore_headers: false
+          use_required_attribute_for_headers: true
+          include_if_null: false

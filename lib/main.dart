@@ -1,82 +1,107 @@
-import 'package:cashback_info/bloc/add_card_bloc/add_card_bloc_bloc.dart';
-import 'package:cashback_info/bloc/delete_card_bloc/delete_card_bloc_bloc.dart';
-import 'package:cashback_info/bloc/read_cards_bloc/read_cards_bloc_bloc.dart';
-import 'package:cashback_info/bloc/update_card_bloc/update_card_bloc_bloc.dart';
-import 'package:cashback_info/data_layer/models/card.dart';
-import 'package:cashback_info/ui/add_card_page.dart';
-import 'package:cashback_info/ui/home_page.dart';
-import 'package:cashback_info/ui/not_found_page.dart';
-import 'package:cashback_info/ui/update_card_page.dart';
+import 'package:cashback_info/feature/auth/bloc/auth_bloc.dart';
+import 'package:cashback_info/feature/auth/data/repository/repository.dart';
+import 'package:cashback_info/feature/auth/ui/page/login_page.dart';
+import 'package:cashback_info/feature/bank/data/repsoitory/repository.dart';
+import 'package:cashback_info/feature/card/bloc/card_bloc.dart';
+import 'package:cashback_info/feature/card/data/repository/repository.dart';
+import 'package:cashback_info/feature/cashback/bloc/cashback_bloc.dart';
+import 'package:cashback_info/feature/cashback/data/repsoitory/repository.dart';
+import 'package:cashback_info/feature/category/bloc/category_bloc.dart';
+import 'package:cashback_info/feature/category/data/repository/repository.dart';
+import 'package:cashback_info/feature/family/data/repository/repository.dart';
+import 'package:cashback_info/feature/family_invites/data/repository/repsoitory.dart';
+import 'package:cashback_info/feature/user/data/repository/repository.dart';
+import 'package:cashback_info/internal/api/api.swagger.dart';
+import 'package:cashback_info/internal/service/local_storage.dart';
+import 'package:cashback_info/feature/card/ui/page/card_page.dart';
+import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'data_layer/models/cashback.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
+  setupDI();
+
   runApp(MyApp());
 }
 
+void setupDI() {
+  final getIt = GetIt.I;
+  final api = Api.create(
+    baseUrl: Uri.parse('http://10.0.2.2:8080/'),
+  );
+  getIt.registerSingleton<LocalStorageService>(LocalStorageService());
+  getIt.registerSingleton<CashbackRepository>(CashbackRepository(api));
+  getIt.registerSingleton<CategoryRepository>(CategoryRepository(api));
+  getIt.registerSingleton<BankRepository>(BankRepository(api));
+  getIt.registerSingleton<AuthRepository>(AuthRepository(api));
+  getIt.registerSingleton<CardRepository>(CardRepository(api));
+  getIt.registerSingleton<FamilyRepository>(FamilyRepository(api));
+  getIt.registerSingleton<FamilyInviteRepository>(FamilyInviteRepository(api));
+  getIt.registerSingleton<UserRepository>(UserRepository(api));
+}
+
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-  final RouteObserver<ModalRoute<void>> routeObserver =
-      RouteObserver<ModalRoute<void>>();
-  // This widget is the root of your application.
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorSchemeSeed: Colors.blue,
-          brightness: Brightness.dark,
-          useMaterial3: true,
-        ),
-        initialRoute: HomePage.routeName,
-        onGenerateRoute: (settings) {
-          switch (settings.name) {
-            case HomePage.routeName:
-              return PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    MultiBlocProvider(
-                  providers: [
-                    BlocProvider<ReadCardsBloc>(
-                      create: (context) {
-                        ReadCardsBloc readCardsBloc = ReadCardsBloc();
-                        readCardsBloc.add(ReadCardList());
-                        return readCardsBloc;
-                      },
-                    ),
-                    BlocProvider<DeleteCardBloc>(
-                      create: (context) {
-                        DeleteCardBloc deleteCardsBloc = DeleteCardBloc();
-                        return deleteCardsBloc;
-                      },
-                    ),
-                  ],
-                  child: HomePage(),
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.blue,
+        brightness: Brightness.dark,
+        useMaterial3: true,
+      ),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => AuthBloc(
+              GetIt.I<AuthRepository>(),
+              GetIt.I<UserRepository>(),
+              GetIt.I<LocalStorageService>(),
+            )..add(AuthCheck()),
+          ),
+        ],
+        child: BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) => state is LoggedOut
+              ? Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => LoginPage(),
+                  ),
+                )
+              : null,
+          builder: (context, state) {
+            if (state is AuthLoading) {
+              return Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
                 ),
               );
-            case UpdateCardPage.routeName:
-              final card = settings.arguments as BankCard;
-              return PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      BlocProvider(
-                        create: (context) => UpdateCardBloc(),
-                        child: UpdateCardPage(userCardToUpdate: card),
-                      ));
-            case AddCardPage.routeName:
-              return PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    BlocProvider<AddCardBloc>(
-                        create: (context) => AddCardBloc(),
-                        child: AddCardPage()),
+            } else if (state is LoggedIn) {
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) => CardBloc(
+                      GetIt.I<CardRepository>(),
+                      state.authHeader,
+                    )..add(GetCards()),
+                  ),
+                  BlocProvider(
+                    create: (context) => CashbackBloc(
+                      GetIt.I<CashbackRepository>(),
+                      state.authHeader,
+                    ),
+                  ),
+                ],
+                child: CardPage(),
               );
-            case NotFoundPage.routeName:
-              return PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    NotFoundPage(),
-              );
-          }
-        });
+            } else {
+              return LoginPage();
+            }
+          },
+        ),
+      ),
+    );
   }
 }
