@@ -45,32 +45,21 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.blue,
-        brightness: Brightness.dark,
-        useMaterial3: true,
-      ),
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => AuthBloc(
-              GetIt.I<AuthRepository>(),
-              GetIt.I<UserRepository>(),
-              GetIt.I<LocalStorageService>(),
-            )..add(AuthCheck()),
-          ),
-        ],
-        child: BlocConsumer<AuthBloc, AuthState>(
-          listener: (context, state) => state is LoggedOut
-              ? Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => LoginPage(),
-                  ),
-                )
-              : null,
+    return BlocProvider<AuthBloc>(
+      create: (context) => AuthBloc(
+        GetIt.I<AuthRepository>(),
+        GetIt.I<UserRepository>(),
+        GetIt.I<LocalStorageService>(),
+      )..add(AuthCheck()),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorSchemeSeed: Colors.blue,
+          brightness: Brightness.dark,
+          useMaterial3: true,
+        ),
+        home: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
             if (state is AuthLoading) {
               return Scaffold(
@@ -79,27 +68,125 @@ class MyApp extends StatelessWidget {
                 ),
               );
             } else if (state is LoggedIn) {
-              return MultiBlocProvider(
-                providers: [
-                  BlocProvider(
-                    create: (context) => CardBloc(
-                      GetIt.I<CardRepository>(),
-                      state.authHeader,
-                    )..add(GetCards()),
-                  ),
-                  BlocProvider(
-                    create: (context) => CashbackBloc(
-                      GetIt.I<CashbackRepository>(),
-                      state.authHeader,
-                    ),
-                  ),
-                ],
-                child: CardPage(),
+              return HomePage(
+                authHeader: state.authHeader,
+                user: state.user,
+                authBloc: BlocProvider.of<AuthBloc>(context),
               );
             } else {
               return LoginPage();
             }
           },
+        ),
+      ),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  final AuthBloc authBloc;
+  final String authHeader;
+  final UserUser user;
+  const HomePage(
+      {super.key,
+      required this.authHeader,
+      required this.user,
+      required this.authBloc});
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => CardBloc(
+            GetIt.I<CardRepository>(),
+            widget.authHeader,
+          )..add(GetCards()),
+        ),
+        BlocProvider(
+          create: (context) => CashbackBloc(
+            GetIt.I<CashbackRepository>(),
+            widget.authHeader,
+          ),
+        )
+      ],
+      child: Scaffold(
+        body: [
+          CardPage(),
+          ProfilePage(
+            user: widget.user,
+            authBloc: widget.authBloc,
+          ),
+        ][_selectedIndex], // Отображаем выбранный виджет
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.card_giftcard),
+              label: 'Карты',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Профиль',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.blue,
+          onTap: _onItemTapped,
+        ),
+      ),
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  final AuthBloc authBloc;
+  final UserUser user;
+
+  const ProfilePage({
+    super.key,
+    required this.user,
+    required this.authBloc,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Профиль'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Никнейм'),
+              subtitle: Text(user.login),
+            ),
+            ListTile(
+              leading: Icon(Icons.email),
+              title: Text('Email'),
+              subtitle: Text(user.email),
+            ),
+            Spacer(),
+            TextButton(
+              onPressed: () {
+                authBloc.add(AuthLogout());
+              },
+              child: const Text('Выйти', style: TextStyle(color: Colors.red)),
+            ),
+          ],
         ),
       ),
     );
