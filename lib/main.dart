@@ -10,6 +10,7 @@ import 'package:cashback_info/feature/category/bloc/category_bloc.dart';
 import 'package:cashback_info/feature/category/data/repository/repository.dart';
 import 'package:cashback_info/feature/family/data/repository/repository.dart';
 import 'package:cashback_info/feature/family_invites/data/repository/repsoitory.dart';
+import 'package:cashback_info/feature/user/bloc/user_bloc.dart';
 import 'package:cashback_info/feature/user/data/repository/repository.dart';
 import 'package:cashback_info/internal/api/api.swagger.dart';
 import 'package:cashback_info/internal/service/local_storage.dart';
@@ -45,12 +46,21 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBloc>(
-      create: (context) => AuthBloc(
-        GetIt.I<AuthRepository>(),
-        GetIt.I<UserRepository>(),
-        GetIt.I<LocalStorageService>(),
-      )..add(AuthCheck()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(
+            GetIt.I<AuthRepository>(),
+            GetIt.I<UserRepository>(),
+            GetIt.I<LocalStorageService>(),
+          )..add(AuthCheck()),
+        ),
+        BlocProvider(
+          create: (context) => UserBloc(
+            GetIt.I<UserRepository>(),
+          ),
+        ),
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         debugShowCheckedModeBanner: false,
@@ -125,6 +135,9 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         body: [
           CardPage(),
+          CardPage(
+            isFamilyCards: true,
+          ),
           ProfilePage(
             user: widget.user,
             authBloc: widget.authBloc,
@@ -133,8 +146,12 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.card_giftcard),
+              icon: Icon(Icons.credit_card),
               label: 'Карты',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.family_restroom),
+              label: 'Семья',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
@@ -164,11 +181,28 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Профиль'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              authBloc.add(AuthLogout());
+            },
+            child: const Text('Выйти', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Text(
+                  'Обо мне',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
             ListTile(
               leading: Icon(Icons.person),
               title: Text('Никнейм'),
@@ -179,16 +213,65 @@ class ProfilePage extends StatelessWidget {
               title: Text('Email'),
               subtitle: Text(user.email),
             ),
-            Spacer(),
-            TextButton(
-              onPressed: () {
-                authBloc.add(AuthLogout());
-              },
-              child: const Text('Выйти', style: TextStyle(color: Colors.red)),
+            FamilyInvitationsWidget(
+              invitations: ['Скворцовы'],
             ),
+            Spacer(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class FamilyInvitationsWidget extends StatelessWidget {
+  final List<String> invitations;
+
+  const FamilyInvitationsWidget({super.key, required this.invitations});
+
+  @override
+  Widget build(BuildContext context) {
+    if (invitations.isEmpty) return SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Приглашения в семью',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        ...invitations.map((familyName) => Container(
+              margin: EdgeInsets.symmetric(vertical: 6),
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.family_restroom, color: Colors.white),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(familyName,
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.check, color: Colors.green),
+                    onPressed: () {
+                      // принять приглашение
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, color: Colors.redAccent),
+                    onPressed: () {
+                      // отклонить приглашение
+                    },
+                  ),
+                ],
+              ),
+            )),
+      ],
     );
   }
 }

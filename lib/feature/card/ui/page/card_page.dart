@@ -2,14 +2,16 @@ import 'package:cashback_info/feature/card/bloc/card_bloc.dart';
 import 'package:cashback_info/feature/card/ui/page/create_card_page.dart';
 import 'package:cashback_info/feature/cashback/bloc/cashback_bloc.dart';
 import 'package:cashback_info/feature/cashback/ui/page/update_cashback.dart';
+import 'package:cashback_info/feature/family/ui/family_page.dart';
 import 'package:cashback_info/internal/api/api.swagger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CardPage extends StatelessWidget with RouteAware {
   late List<CardCard> _userCardList;
+  final bool isFamilyCards;
 
-  CardPage({super.key});
+  CardPage({super.key, this.isFamilyCards = false});
 
   @override
   Widget build(BuildContext context) {
@@ -17,24 +19,37 @@ class CardPage extends StatelessWidget with RouteAware {
     final cardBloc = BlocProvider.of<CardBloc>(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Кешбек по картам',
+        title: Text(
+          isFamilyCards ? 'Семейные карты' : 'Кешбек по картам',
           style: TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider.value(
-                    value: cardBloc,
-                    child: CreateCardPage(),
-                  ),
-                ),
-              );
-            },
-            icon: Icon(Icons.add),
-          ),
+          isFamilyCards
+              ? IconButton(
+                  icon: Icon(Icons.home),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => FamilyPage(
+                          isFamilyLeader: true,
+                        ),
+                      ),
+                    );
+                  },
+                )
+              : IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => BlocProvider.value(
+                          value: cardBloc,
+                          child: CreateCardPage(),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.add),
+                )
         ],
       ),
       body: BlocBuilder<CardBloc, CardState>(builder: (context, state) {
@@ -51,6 +66,7 @@ class CardPage extends StatelessWidget with RouteAware {
             itemCount: _userCardList.length,
             itemBuilder: (context, index) => showCardInformation(
               context,
+              isFamilyCards,
               cardBloc,
               cashbackBloc,
               _userCardList[index],
@@ -68,6 +84,7 @@ class CardPage extends StatelessWidget with RouteAware {
 
 Widget showCardInformation(
   BuildContext context,
+  bool isFamilyCards,
   CardBloc cardBloc,
   CashbackBloc cashbackBloc,
   CardCard card,
@@ -120,40 +137,42 @@ Widget showCardInformation(
           context,
           card.categories,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => BlocProvider.value(
-                        value: cashbackBloc,
-                        child: BlocProvider.value(
-                          value: cardBloc,
-                          child: UpdateCashbackPage(
-                            bankId: card.bank!.id,
-                            cardId: card.id,
-                          ),
-                        )),
+        !isFamilyCards
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => BlocProvider.value(
+                              value: cashbackBloc,
+                              child: BlocProvider.value(
+                                value: cardBloc,
+                                child: UpdateCashbackPage(
+                                  bankId: card.bank!.id,
+                                  cardId: card.id,
+                                ),
+                              )),
+                        ),
+                      );
+                    },
+                    child: Text('Редактировать'),
                   ),
-                );
-              },
-              child: Text('Редактировать'),
-            ),
-            TextButton(
-              onPressed: () {
-                cardBloc.add(
-                  DeleteCard(id: card.id),
-                );
-              },
-              child: Text(
-                'Удалить',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        ),
+                  TextButton(
+                    onPressed: () {
+                      cardBloc.add(
+                        DeleteCard(id: card.id),
+                      );
+                    },
+                    child: Text(
+                      'Удалить',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              )
+            : SizedBox.shrink(),
       ],
     ),
   );

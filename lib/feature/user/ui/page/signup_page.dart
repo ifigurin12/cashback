@@ -40,25 +40,30 @@ class SignupPage extends StatelessWidget {
                 obscureText: true,
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  BlocProvider.of<UserBloc>(context).add(
-                    CreateUserEvent(
-                      email: emailController.text,
-                      login: loginController.text,
-                      password: passwordController.text,
-                    ),
-                  );
-                },
-                child: Text('Зарегестрироваться'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(
-                    context,
-                  );
-                },
-                child: Text('Уже есть аккаунт? Войти'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      BlocProvider.of<UserBloc>(context).add(
+                        CreateUserEvent(
+                          email: emailController.text,
+                          login: loginController.text,
+                          password: passwordController.text,
+                        ),
+                      );
+                    },
+                    child: Text('Зарегестрироваться'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(
+                        context,
+                      );
+                    },
+                    child: Text('Уже есть аккаунт? Войти'),
+                  ),
+                ],
               ),
             ],
           ),

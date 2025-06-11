@@ -86,7 +86,34 @@ class _UpdateCashbackPageState extends State<UpdateCashbackPage> {
               body: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Распознать категории',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Spacer(),
+                        IconButton(
+                            onPressed: () {}, icon: Icon(Icons.photo_camera)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'Выберите категории',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Spacer(),
+                        ElevatedButton(
+                          onPressed: _addCategory, // Добавляем новую категорию
+                          child: Text('Добавить'),
+                        ),
+                      ],
+                    ),
                     Expanded(
                       child: ListView.builder(
                         itemCount: _selectedCategoryIDsWithPercentage.length,
@@ -157,15 +184,13 @@ class _UpdateCashbackPageState extends State<UpdateCashbackPage> {
                         },
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: _addCategory, // Добавляем новую категорию
-                      child: Text('Добавить категорию'),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: _submit,
+                        child: Text('Сохранить изменения'),
+                      ),
                     ),
                     SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: _submit,
-                      child: Text('Сохранить изменения'),
-                    ),
                   ],
                 ),
               ),

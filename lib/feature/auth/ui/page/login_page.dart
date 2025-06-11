@@ -21,7 +21,7 @@ class LoginPage extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text('Login')),
+        appBar: AppBar(title: Text('Войти')),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -36,26 +36,33 @@ class LoginPage extends StatelessWidget {
                 obscureText: true,
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  BlocProvider.of<AuthBloc>(context).add(
-                    AuthLogin(
-                      emailController.text,
-                      passwordController.text,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      BlocProvider.of<AuthBloc>(context).add(
+                        AuthLogin(
+                          emailController.text,
+                          passwordController.text,
+                        ),
+                      );
+                    },
+                    child: Text('Вход'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage()),
+                      );
+                    },
+                    child: Text(
+                      'Нет аккаунта? Зарегестрироваться',
                     ),
-                  );
-                },
-                child: Text('Вход'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignupPage()),
-                  );
-                },
-                child: Text('Нет аккаунта? Зарегестрироваться'),
-              ),
+                  ),
+                ],
+              )
             ],
           ),
         ),
