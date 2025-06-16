@@ -58,7 +58,7 @@ class LoginPage extends StatelessWidget {
                       );
                     },
                     child: Text(
-                      'Нет аккаунта? Зарегестрироваться',
+                      'Нет аккаунта? Зарегистрироваться',
                     ),
                   ),
                 ],
