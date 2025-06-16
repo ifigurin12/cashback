@@ -53,7 +53,7 @@ class SignupPage extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Text('Зарегестрироваться'),
+                    child: Text('Зарегистрироваться'),
                   ),
                   TextButton(
                     onPressed: () {
